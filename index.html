@@ -472,8 +472,8 @@ nav{
           <span>I agree to receive updates and news from WealthPilot</span>
         </label>
         <div class="gate-err" id="gate-err">Please fill in all fields and agree to continue.</div>
-        <button type="submit" class="gate-submit">Get Free Access &rarr;</button>
-      <button type="submit" class="gate-submit">Get Free Access &rarr;</button>
+        <button type="submit" class="gate-submit" onclick="submitgate(event)">Get Free Access &rarr;</button>
+      </form>
       <p class="gate-privacy">&#128274; Your data is never sold or shared with third parties.</p>
     </div>
   </div>
@@ -653,7 +653,8 @@ nav{
 // ─────────────────────────────────────────────
 // CONFIG
 // ─────────────────────────────────────────────
-const ANTHROPIC_EP = const ANTHROPIC_EP = 'https://empty-block-1f07.babar-wealthpilot.workers.dev';
+const ANTHROPIC_API_KEY = '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';
+const ANTHROPIC_EP = 'https://api.anthropic.com/v1/messages';
 const FREE_LIMIT   = 5;
 const ACCESS_DAYS  = 14;
 const ADMIN_PASS   = 'babar2024';
