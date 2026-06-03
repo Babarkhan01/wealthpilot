@@ -655,9 +655,29 @@ nav{
 // ─────────────────────────────────────────────
 
 const ANTHROPIC_EP = 'https://empty-block-1f07.babar-wealthpilot.workers.dev';
-const FREE_LIMIT   = 5;
-const ACCESS_DAYS  = 14;
-const ADMIN_PASS   = 'babar2024';
+const ACCESS_DAYS = 14;
+
+const PLAN_LIMITS = {
+  trial:        5,
+  starter:      30,
+  professional: 60,
+  enterprise:   999
+};
+
+function getUserPlan() {
+  const email = localStorage.getItem('wp_user_email');
+  if (!email) return 'trial';
+  const leads = JSON.parse(
+    localStorage.getItem('wp_leads') || '[]'
+  );
+  const lead = leads.find(l => l.email === email);
+  if (!lead) return 'trial';
+  if (!isInTrial(lead.ts)) return 'trial';
+  return lead.plan || 'trial';
+}
+
+const FREE_LIMIT = PLAN_LIMITS[getUserPlan()];
+const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
 
 const SYS = `You are WealthPilot, an expert AI investment guide for US financial advisors and their clients.
 
