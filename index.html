@@ -796,8 +796,8 @@ function goScreen(s) {
 }
 
 function updAccessUI() {
-    showUsageBar();
-  }
+  showUsageBar();
+}
 
 // ─────────────────────────────────────────────
 // ROUTING — /admin
@@ -992,19 +992,7 @@ async function send() {
   const text = inp.value.trim();
   if (!text) return;
 
-  // Access check — 5/day limit applies to ALL users always
-  if (rem() <= 0) { openUpgradeModal(); return; }
-
-  inp.value = '';
-  inp.style.height = 'auto';
-  addMsg('user', text);
-  setTyp(true);
-async function send() {
-  const inp  = document.getElementById('mi');
-  const text = inp.value.trim();
-  if (!text) return;
-
-  // 5/day limit for ALL users
+  // 5/day limit for ALL users always
   if (rem() <= 0) { openUpgradeModal(); return; }
 
   inp.value = '';
@@ -1030,7 +1018,6 @@ async function send() {
   document.getElementById('sb').disabled = false;
   inp.focus();
 }
-
 const qs = t => { document.getElementById('mi').value = t; send(); };
 const hk = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 const ag = el => { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
