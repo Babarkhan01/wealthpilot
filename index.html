@@ -798,7 +798,6 @@ function goScreen(s) {
 function updAccessUI() {
     showUsageBar();
   }
-}
 
 // ─────────────────────────────────────────────
 // ROUTING — /admin
@@ -1000,8 +999,20 @@ async function send() {
   inp.style.height = 'auto';
   addMsg('user', text);
   setTyp(true);
+async function send() {
+  const inp  = document.getElementById('mi');
+  const text = inp.value.trim();
+  if (!text) return;
 
-  addU(); updAccessUI();
+  // 5/day limit for ALL users
+  if (rem() <= 0) { openUpgradeModal(); return; }
+
+  inp.value = '';
+  inp.style.height = 'auto';
+  addMsg('user', text);
+  setTyp(true);
+  addU();
+  updAccessUI();
 
   document.getElementById('sb').disabled = true;
 
@@ -1011,9 +1022,8 @@ async function send() {
     addMsg('ai', reply);
   } catch (err) {
     setTyp(false);
-      localStorage.setItem(dk(), Math.max(0, used() - 1));
-      updAccessUI();
-    }
+    localStorage.setItem(dk(), Math.max(0, used() - 1));
+    updAccessUI();
     showToast('Connection error: ' + (err.message || 'please try again.'));
   }
 
