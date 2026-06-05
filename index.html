@@ -492,7 +492,7 @@ nav{
     </div>
     <div class="u-bar" id="ubar" style="display:none">
       <div class="u-left">
-        <span>Free questions:</span>
+        <span>Questions today:</span>
         <span class="u-num" id="unum">5</span>
         <span>remaining today</span>
       </div>
@@ -518,7 +518,7 @@ nav{
       <div class="i-row">
         <textarea id="mi" placeholder="Ask about investments, tax strategies, retirement planning..." rows="1" onkeydown="hk(event)" oninput="ag(this)"></textarea>
         <div class="i-actions">
-          <button class="demo-btn" onclick="bookDemo()">&#128197; Book free demo</button>
+          <button class="demo-btn" onclick="bookDemo()">&#128197; Book a call </button>
           <button id="sb" onclick="send()">&#10148;</button>
         </div>
       </div>
@@ -593,7 +593,7 @@ nav{
   </div>
   <footer class="footer">
     &#128274; Privacy First &mdash; No data stored beyond your session &mdash;
-    <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a> &mdash;
+    <a href="mailto:babar.wealthpilot@gmail.com?subject=WealthPilot...Enterprise...">Contact Us</a>
     Founded 2026 &mdash; WealthPilot
   </footer>
 </div>
@@ -796,9 +796,6 @@ function goScreen(s) {
 }
 
 function updAccessUI() {
-  if (isAccessValid()) {
-    document.getElementById('ubar').style.display = 'none';
-  } else {
     showUsageBar();
   }
 }
@@ -996,17 +993,15 @@ async function send() {
   const text = inp.value.trim();
   if (!text) return;
 
-  // Access check
-  if (!isAccessValid()) {
-    if (rem() <= 0) { openUpgradeModal(); return; }
-  }
+  // Access check — 5/day limit applies to ALL users always
+  if (rem() <= 0) { openUpgradeModal(); return; }
 
   inp.value = '';
   inp.style.height = 'auto';
   addMsg('user', text);
   setTyp(true);
 
-  if (!isAccessValid()) { addU(); updAccessUI(); }
+  addU(); updAccessUI();
 
   document.getElementById('sb').disabled = true;
 
@@ -1016,7 +1011,6 @@ async function send() {
     addMsg('ai', reply);
   } catch (err) {
     setTyp(false);
-    if (!isAccessValid()) {
       localStorage.setItem(dk(), Math.max(0, used() - 1));
       updAccessUI();
     }
