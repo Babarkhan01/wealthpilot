@@ -1,0 +1,120 @@
+!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terms of Service — WealthPilot</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f5a623'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='20' fill='%23000'%3EW%3C/text%3E%3C/svg%3E">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0e1a;--bg-card:#111827;--gold:#f5a623;--gold-b:rgba(245,166,35,0.4);--text:#fff;--muted:#9ca3af;--dim:#6b7280;--border:rgba(255,255,255,0.08);--r:12px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);line-height:1.7}
+nav{position:sticky;top:0;background:rgba(10,14,26,0.96);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);height:60px;display:flex;align-items:center;padding:0 1.5rem;justify-content:space-between;z-index:100}
+.n-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.n-box{width:34px;height:34px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000}
+.n-name{font-size:17px;font-weight:700;color:var(--text)}
+.back{font-size:13px;color:var(--muted);text-decoration:none;border:1px solid var(--border);padding:6px 14px;border-radius:8px}
+.back:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+.wrap{max-width:760px;margin:0 auto;padding:3rem 1.5rem 5rem}
+.badge{display:inline-block;background:rgba(245,166,35,0.12);border:1px solid var(--gold-b);color:var(--gold);padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;margin-bottom:1.5rem}
+h1{font-size:clamp(24px,4vw,36px);font-weight:800;letter-spacing:-.02em;margin-bottom:.5rem}
+.meta{font-size:13px;color:var(--dim);margin-bottom:2.5rem}
+h2{font-size:18px;font-weight:700;color:var(--gold);margin:2.5rem 0 .75rem;padding-bottom:.5rem;border-bottom:1px solid var(--border)}
+p{font-size:14.5px;color:var(--muted);margin-bottom:1rem}
+ul{padding-left:1.5rem;margin-bottom:1rem}
+ul li{font-size:14.5px;color:var(--muted);margin-bottom:.4rem}
+a{color:var(--gold);text-decoration:none}
+a:hover{text-decoration:underline}
+.highlight{background:var(--bg-card);border:1px solid rgba(245,166,35,0.3);border-radius:var(--r);padding:1.25rem 1.5rem;margin:1.5rem 0}
+.highlight p{margin-bottom:0;color:var(--text)}
+.warn{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.3);border-radius:var(--r);padding:1.25rem 1.5rem;margin:1.5rem 0}
+.warn p{margin-bottom:0;color:#fca5a5}
+footer{text-align:center;padding:2rem 1.5rem;border-top:1px solid var(--border);font-size:12px;color:var(--dim)}
+footer a{color:var(--gold)}
+</style>
+</head>
+<body>
+<nav>
+  <a class="n-logo" href="/"><div class="n-box">W</div><span class="n-name">WealthPilot</span></a>
+  <a class="back" href="/">&larr; Back to app</a>
+</nav>
+<div class="wrap">
+  <div class="badge">LEGAL</div>
+  <h1>Terms of Service</h1>
+  <p class="meta">Effective date: June 15, 2026 &mdash; Last updated: June 15, 2026</p>
+ 
+  <div class="warn">
+    <p>&#9888;&#65039; <strong>Important:</strong> WealthPilot provides AI-assisted research for informational purposes only. It is not registered investment advice, tax advice, or legal advice. You are solely responsible for verifying all outputs before use with clients.</p>
+  </div>
+ 
+  <h2>1. Acceptance of terms</h2>
+  <p>By accessing or using WealthPilot ("Service"), you agree to be bound by these Terms of Service ("Terms"). If you do not agree, do not use the Service. These Terms apply to all users, including fee-only financial advisors, RIAs, and CFPs.</p>
+ 
+  <h2>2. Description of service</h2>
+  <p>WealthPilot is an AI-powered research assistant that helps fee-only Certified Financial Planners (CFPs) research tax planning strategies, retirement income topics, and related financial concepts. The Service uses the Claude AI model by Anthropic, PBC to generate responses grounded in publicly available IRS, SSA, and Medicare guidance.</p>
+ 
+  <h2>3. Not financial, tax, or legal advice</h2>
+  <div class="highlight">
+    <p>&#128204; WealthPilot outputs are for <strong>research and educational purposes only</strong>. They do not constitute personalised financial advice, tax advice, legal advice, or investment recommendations. WealthPilot is not registered with the SEC, FINRA, IRS, or any regulatory body as an investment advisor, broker-dealer, or tax professional.</p>
+  </div>
+  <p>You acknowledge and agree that:</p>
+  <ul>
+    <li>All AI-generated content must be independently verified before use with or presentation to clients.</li>
+    <li>Tax laws, IRS guidance, and financial regulations change frequently. WealthPilot may not reflect the most current rules.</li>
+    <li>You remain solely responsible for all advice given to your clients, regardless of any research assistance provided by WealthPilot.</li>
+    <li>WealthPilot does not replace your professional judgment, fiduciary obligations, or compliance obligations as a licensed advisor.</li>
+  </ul>
+ 
+  <h2>4. Eligibility and account</h2>
+  <p>You must be at least 18 years old and a licensed or otherwise qualified financial professional to use WealthPilot. By signing up, you represent that the information you provide is accurate. You are responsible for maintaining the confidentiality of your access credentials.</p>
+ 
+  <h2>5. Subscription and payment</h2>
+  <ul>
+    <li><strong>Free trial:</strong> New users receive a 14-day free trial with limited query access.</li>
+    <li><strong>Paid plans:</strong> Starter ($199/mo), Professional ($299/mo), Enterprise ($599/mo). Prices are in USD.</li>
+    <li><strong>Billing:</strong> Subscriptions are billed monthly. Payment is processed via Wise or Stripe.</li>
+    <li><strong>Cancellation:</strong> You may cancel at any time by emailing <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a>. Access continues until the end of the current billing period. No prorated refunds are issued for partial months.</li>
+    <li><strong>Money-back guarantee:</strong> If you are not satisfied within the first 14 days of a paid subscription, contact us for a full refund.</li>
+    <li><strong>Price changes:</strong> We will notify you at least 30 days before any price increase.</li>
+  </ul>
+ 
+  <h2>6. Acceptable use</h2>
+  <p>You agree not to:</p>
+  <ul>
+    <li>Use WealthPilot to provide direct investment advice to retail clients without your own professional review and verification.</li>
+    <li>Enter clients' personally identifiable information (names, SSNs, account numbers) into the chat interface.</li>
+    <li>Attempt to reverse-engineer, scrape, or extract data from WealthPilot's systems.</li>
+    <li>Share your account access with others outside your firm.</li>
+    <li>Use WealthPilot for any unlawful purpose or in violation of applicable regulations.</li>
+    <li>Misrepresent WealthPilot outputs as independently verified professional advice.</li>
+  </ul>
+ 
+  <h2>7. Intellectual property</h2>
+  <p>The WealthPilot platform, branding, and code are owned by WealthPilot's founder. AI-generated research outputs are provided to you for your professional use. You may not resell or redistribute outputs as a standalone product.</p>
+ 
+  <h2>8. Disclaimer of warranties</h2>
+  <p>THE SERVICE IS PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, OR NON-INFRINGEMENT. WE DO NOT WARRANT THAT THE SERVICE WILL BE ERROR-FREE, UNINTERRUPTED, OR THAT AI OUTPUTS WILL BE ACCURATE, COMPLETE, OR UP TO DATE.</p>
+ 
+  <h2>9. Limitation of liability</h2>
+  <p>TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, WEALTHPILOT AND ITS FOUNDER SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR PUNITIVE DAMAGES, INCLUDING LOSS OF PROFITS, DATA, OR GOODWILL, ARISING OUT OF OR IN CONNECTION WITH YOUR USE OF THE SERVICE — EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.</p>
+  <p>IN NO EVENT SHALL OUR TOTAL LIABILITY TO YOU EXCEED THE AMOUNT YOU PAID TO US IN THE 12 MONTHS PRECEDING THE CLAIM.</p>
+ 
+  <h2>10. Indemnification</h2>
+  <p>You agree to indemnify and hold WealthPilot and its founder harmless from any claims, damages, or expenses (including reasonable legal fees) arising from your use of the Service, your violation of these Terms, or your breach of any applicable law or regulation.</p>
+ 
+  <h2>11. Termination</h2>
+  <p>We may suspend or terminate your access if you violate these Terms, engage in fraudulent activity, or if we are required to do so by law. You may terminate your account at any time by contacting us. Sections 3, 8, 9, 10, and 12 survive termination.</p>
+ 
+  <h2>12. Governing law and disputes</h2>
+  <p>These Terms are governed by the laws of the State of Delaware, United States, without regard to conflict of law principles. Any dispute arising under these Terms shall be resolved by binding arbitration in accordance with the rules of the American Arbitration Association, with proceedings conducted in English. You waive any right to a jury trial or class action participation.</p>
+ 
+  <h2>13. Changes to terms</h2>
+  <p>We may update these Terms from time to time. We will notify you by email at least 14 days before material changes take effect. Continued use after that date constitutes acceptance of the updated Terms.</p>
+ 
+  <h2>14. Contact</h2>
+  <p>Questions about these Terms: <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a></p>
+</div>
+<footer>&copy; 2026 WealthPilot &mdash; <a href="/privacy.html">Privacy Policy</a> &middot; <a href="/terms.html">Terms of Service</a> &middot; <a href="/">Back to App</a></footer>
+</body>
+</html>
+ 
