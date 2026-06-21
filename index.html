@@ -3,18 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="AI-powered investment education chatbot for independent financial advisors. 401k, IRA, retirement planning guidance powered by Claude AI.">
-<meta property="og:title" content="WealthPilot — AI Research Assistant for Financial Advisors">
-<meta property="og:description" content="AI-powered investment education for independent financial advisors.">
+<meta name="description" content="AI-powered tax and retirement research tool for fee-only CFPs and NAPFA-listed financial advisors. IRS-cited sources. Research assistant only.">
+<meta property="og:title" content="WealthPilot — AI Research Assistant for Fee-Only CFPs">
+<meta property="og:description" content="AI-powered retirement and tax research for independent financial advisors. Not investment advice.">
 <meta property="og:type" content="website">
 <meta name="twitter:card" content="summary_large_image">
 <title>WealthPilot — AI Research Assistant for Financial Advisors</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>
-  (function(){
-    emailjs.init({ publicKey: "7NynABxMNuJoxAJNl" });
-  })();
-</script>
+<script>(function(){ emailjs.init({ publicKey: "7NynABxMNuJoxAJNl" }); })();</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f5a623'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='20' fill='%23000'%3EW%3C/text%3E%3C/svg%3E">
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
@@ -27,151 +23,82 @@
   --green:#10b981;--red:#f87171;--r:12px;--rl:16px
 }
 html,body{height:100%}
-body{
-  font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;
-  background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6
-}
-
-/* ── NAV ── */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:200;
-  background:var(--bg-nav);border-bottom:1px solid var(--border);
-  backdrop-filter:blur(12px);height:60px;display:flex;
-  align-items:center;padding:0 1.25rem;justify-content:space-between
-}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
+ 
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);height:60px;display:flex;align-items:center;padding:0 1.25rem;justify-content:space-between}
 .n-logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none}
-.n-box{
-  width:34px;height:34px;background:var(--gold);border-radius:8px;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:16px;color:#000;flex-shrink:0
-}
+.n-box{width:34px;height:34px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000;flex-shrink:0}
 .n-name{font-size:17px;font-weight:700;color:var(--text)}
 .n-right{display:flex;align-items:center;gap:6px}
-.ai-pill{
-  background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);
-  padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;
-  letter-spacing:.07em;display:flex;align-items:center;gap:4px
-}
-.n-btn{
-  background:none;border:none;color:var(--muted);font-size:14px;font-weight:500;
-  cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:8px;transition:all .15s
-}
+.ai-pill{background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.07em;display:flex;align-items:center;gap:4px}
+.n-btn{background:none;border:none;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:8px;transition:all .15s}
 .n-btn:hover,.n-btn.on{color:var(--text);background:rgba(255,255,255,.06)}
-
-/* ── SCREENS ── */
+ 
+/* SCREENS */
 .screen{display:none}
 .screen.on{display:flex;flex-direction:column;min-height:100vh}
 #screen-chat.on{height:100vh;overflow:hidden}
-
-/* ── EMAIL GATE ── */
-.gate-wrap{
-  flex:1;display:flex;align-items:center;justify-content:center;
-  padding:80px 1.5rem 2rem;background:radial-gradient(ellipse at 50% 30%,rgba(245,166,35,.07) 0%,transparent 70%)
-}
-.gate-card{
-  background:var(--bg-card);border:1px solid var(--border-g);border-radius:20px;
-  padding:2.5rem;max-width:460px;width:100%;text-align:center
-}
-.gate-icon{
-  width:72px;height:72px;background:var(--gold);border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-weight:900;font-size:28px;color:#000;margin:0 auto 1.5rem
-}
+ 
+/* EMAIL GATE */
+.gate-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:80px 1.5rem 2rem;background:radial-gradient(ellipse at 50% 30%,rgba(245,166,35,.07) 0%,transparent 70%)}
+.gate-card{background:var(--bg-card);border:1px solid var(--border-g);border-radius:20px;padding:2.5rem;max-width:460px;width:100%;text-align:center}
+.gate-icon{width:72px;height:72px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:#000;margin:0 auto 1.5rem}
 .gate-title{font-size:26px;font-weight:800;margin-bottom:.5rem;letter-spacing:-.02em}
 .gate-sub{font-size:14px;color:var(--muted);margin-bottom:.5rem;line-height:1.6}
-.gate-badge{
-  display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);
-  border:1px solid var(--gold-b);color:var(--gold);padding:4px 12px;
-  border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:1.5rem
-}
+.gate-badge{display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:1.5rem}
 .gate-form{display:flex;flex-direction:column;gap:12px;text-align:left}
-.gate-form input[type=text],.gate-form input[type=email]{
-  width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
-  border-radius:10px;padding:12px 15px;font-size:14px;color:var(--text);
-  font-family:inherit;outline:none;transition:border-color .2s
-}
+.gate-form input[type=text],.gate-form input[type=email]{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:12px 15px;font-size:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s}
 .gate-form input:focus{border-color:var(--gold-b)}
 .gate-form input::placeholder{color:var(--dim)}
 .gate-check{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted);cursor:pointer}
-.gate-check input[type=checkbox]{
-  margin-top:2px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;cursor:pointer
-}
-.gate-submit{
-  width:100%;padding:14px;background:var(--gold);border:none;border-radius:11px;
-  font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:#000;
-  transition:background .2s;margin-top:4px
-}
+.gate-check input[type=checkbox]{margin-top:2px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.gate-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:#000;transition:background .2s;margin-top:4px}
 .gate-submit:hover{background:var(--gold-h)}
 .gate-err{font-size:12px;color:var(--red);display:none;text-align:center}
 .gate-privacy{font-size:11px;color:var(--dim);text-align:center;margin-top:.75rem}
-
-/* ── DISCLAIMER BANNER ── */
-.disc-banner{
-  background:#7c6000;border-bottom:1px solid rgba(245,166,35,.3);
-  padding:8px 1.5rem;text-align:center;font-size:12px;
-  color:#ffe08a;font-weight:500;line-height:1.5;flex-shrink:0
-}
-
-/* ── CHAT LAYOUT ── */
-#screen-chat.on{
-  padding-top:60px;
-}
-.chat-inner{
-  flex:1;display:flex;flex-direction:column;max-width:860px;
-  width:100%;margin:0 auto;padding:0 1rem;overflow:hidden;
-  height:calc(100vh - 60px)
-}
-.disc-inline{
-  background:rgba(124,96,0,0.35);border:1px solid rgba(245,166,35,.25);
-  border-radius:10px;padding:8px 14px;font-size:11.5px;color:#ffe08a;
-  margin-top:.75rem;line-height:1.5;flex-shrink:0;text-align:center
-}
-
-/* ── USAGE BAR ── */
-.u-bar{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);
-  padding:8px 14px;display:flex;align-items:center;justify-content:space-between;
-  gap:.75rem;font-size:12px;margin-top:.6rem;flex-shrink:0
-}
+ 
+/* TRUST BADGES */
+.trust-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:1.25rem 0 .5rem}
+.trust-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);color:#6ee7b7;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
+ 
+/* CHAT LAYOUT */
+#screen-chat.on{padding-top:60px}
+.chat-inner{flex:1;display:flex;flex-direction:column;max-width:860px;width:100%;margin:0 auto;padding:0 1rem;overflow:hidden;height:calc(100vh - 60px)}
+ 
+/* AI DISCLAIMER BANNER */
+.disc-inline{background:rgba(124,96,0,0.35);border:1px solid rgba(245,166,35,.25);border-radius:10px;padding:8px 14px;font-size:11.5px;color:#ffe08a;margin-top:.75rem;line-height:1.5;flex-shrink:0;text-align:center;position:relative}
+.disc-dismiss{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#ffe08a;font-size:14px;cursor:pointer;padding:2px 6px;opacity:.6}
+.disc-dismiss:hover{opacity:1}
+ 
+/* USAGE BAR */
+.u-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:.75rem;font-size:12px;margin-top:.6rem;flex-shrink:0}
 .u-left{display:flex;align-items:center;gap:6px;color:var(--muted)}
 .u-num{font-weight:700;color:var(--gold)}
 .u-track{flex:1;background:rgba(255,255,255,.08);border-radius:4px;height:5px;min-width:40px}
 .u-fill{height:5px;background:var(--gold);border-radius:4px;transition:width .4s}
 .u-up{font-size:11.5px;color:var(--gold);cursor:pointer;font-weight:600;white-space:nowrap}
 .u-up:hover{text-decoration:underline}
-
-/* ── MESSAGES AREA ── */
-.msgs{
-  flex:1;overflow-y:auto;padding:.875rem 0;
-  display:flex;flex-direction:column;gap:.75rem;scroll-behavior:smooth
-}
+ 
+/* RATE LIMIT BAR */
+.rate-bar{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:var(--r);padding:7px 14px;font-size:12px;color:#fca5a5;margin-top:.4rem;flex-shrink:0;display:none;text-align:center}
+ 
+/* MESSAGES */
+.msgs{flex:1;overflow-y:auto;padding:.875rem 0;display:flex;flex-direction:column;gap:.75rem;scroll-behavior:smooth}
 .msgs::-webkit-scrollbar{width:4px}
 .msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
-
-/* ── WELCOME STATE ── */
-.w-state{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  flex:1;text-align:center;padding:2rem 1rem;gap:1rem;animation:fu .4s ease
-}
-.w-ring{
-  width:64px;height:64px;background:var(--gold-dim);border:2px solid var(--gold-b);
-  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px
-}
+ 
+/* WELCOME STATE */
+.w-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:2rem 1rem;gap:1rem;animation:fu .4s ease}
+.w-ring{width:64px;height:64px;background:var(--gold-dim);border:2px solid var(--gold-b);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
 .w-title{font-size:22px;font-weight:700}
 .w-sub{font-size:13.5px;color:var(--muted);max-width:420px;line-height:1.7}
-.w-tagline{
-  font-size:12px;color:var(--gold);background:var(--gold-dim);
-  border:1px solid var(--gold-b);border-radius:20px;padding:4px 14px;font-weight:600
-}
+.w-tagline{font-size:12px;color:var(--gold);background:var(--gold-dim);border:1px solid var(--gold-b);border-radius:20px;padding:4px 14px;font-weight:600}
 .suggs{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%;max-width:520px}
-.s-btn{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);
-  padding:10px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;
-  font-family:inherit;text-align:left;transition:all .15s;line-height:1.4
-}
+.s-btn{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;line-height:1.4}
 .s-btn:hover{border-color:var(--gold-b);color:var(--text);background:var(--bg-card2)}
-
-/* ── MESSAGES ── */
+ 
+/* MESSAGES */
 .msg{animation:fu .25s ease}
 .mu{align-self:flex-end;max-width:78%}
 .ma{align-self:flex-start;max-width:84%}
@@ -186,89 +113,49 @@ nav{
 .ma .mb p:last-child{margin-bottom:0}
 .mt{font-size:11px;color:var(--dim);margin-top:3px;padding:0 3px}
 .mu .mt{text-align:right}
-
-/* ── TYPING INDICATOR ── */
-.tdots{
-  display:none;align-items:center;gap:5px;padding:12px 15px;
-  background:var(--bg-card);border:1px solid var(--border);
-  border-radius:3px 13px 13px 13px;width:fit-content
-}
+ 
+/* SOURCE CITATION */
+.source-cite{background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px;font-size:11.5px;color:var(--gold);margin-top:8px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.source-cite span{opacity:.7}
+ 
+/* TYPING */
+.tdots{display:none;align-items:center;gap:5px;padding:12px 15px;background:var(--bg-card);border:1px solid var(--border);border-radius:3px 13px 13px 13px;width:fit-content}
 .tdots.on{display:flex;animation:fu .2s ease}
 .dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:tb 1.3s infinite ease-in-out}
 .dot:nth-child(2){animation-delay:.18s}
 .dot:nth-child(3){animation-delay:.36s}
-
-/* ── LOADING SHIMMER ── */
-.shimmer{
-  background:linear-gradient(90deg,var(--bg-card) 25%,var(--bg-card2) 50%,var(--bg-card) 75%);
-  background-size:400% 100%;animation:shimmer 1.4s ease infinite
-}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-
-/* ── INPUT AREA ── */
+ 
+/* INPUT */
 .i-wrap{padding:.75rem 0 .875rem;border-top:1px solid var(--border);flex-shrink:0}
-.i-row{
-  display:flex;gap:8px;align-items:flex-end;
-  background:var(--bg-card);border:1px solid var(--border);
-  border-radius:13px;padding:8px 8px 8px 14px;transition:border-color .2s
-}
+.i-row{display:flex;gap:8px;align-items:flex-end;background:var(--bg-card);border:1px solid var(--border);border-radius:13px;padding:8px 8px 8px 14px;transition:border-color .2s}
 .i-row:focus-within{border-color:var(--gold-b)}
-#mi{
-  flex:1;background:none;border:none;outline:none;font-size:14px;
-  color:var(--text);font-family:inherit;resize:none;max-height:110px;line-height:1.5;
-  min-height:22px
-}
+.char-counter{font-size:10px;color:var(--dim);text-align:right;padding:3px 4px 0;transition:color .2s}
+.char-counter.warn{color:#fb923c}
+.char-counter.over{color:var(--red)}
+#mi{flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--text);font-family:inherit;resize:none;max-height:110px;line-height:1.5;min-height:22px}
 #mi::placeholder{color:var(--dim)}
 .i-actions{display:flex;align-items:flex-end;gap:6px;flex-shrink:0}
-.demo-btn{
-  background:none;border:1px solid var(--border);border-radius:8px;
-  padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;
-  font-family:inherit;transition:all .15s;white-space:nowrap;line-height:1.4
-}
+.demo-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s;white-space:nowrap;line-height:1.4}
 .demo-btn:hover{border-color:var(--gold-b);color:var(--gold)}
-#sb{
-  background:var(--gold);border:none;border-radius:9px;
-  width:36px;height:36px;display:flex;align-items:center;
-  justify-content:center;cursor:pointer;flex-shrink:0;
-  transition:all .15s;color:#000;font-size:15px;font-weight:700
-}
+#sb{background:var(--gold);border:none;border-radius:9px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;color:#000;font-size:15px;font-weight:700}
 #sb:hover{background:var(--gold-h);transform:scale(1.05)}
 #sb:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .i-hint{font-size:10.5px;color:var(--dim);text-align:center;margin-top:5px}
-
-/* ── PRICING PAGE ── */
+ 
+/* PRICING */
 #screen-pricing.on{display:block;padding-top:60px}
-.p-hero{
-  text-align:center;padding:4rem 1.5rem 2.5rem;
-  background:radial-gradient(ellipse at 50% 0%,rgba(245,166,35,.08) 0%,transparent 65%)
-}
+.p-hero{text-align:center;padding:4rem 1.5rem 2.5rem;background:radial-gradient(ellipse at 50% 0%,rgba(245,166,35,.08) 0%,transparent 65%)}
 .p-title{font-size:clamp(26px,5vw,46px);font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:.75rem}
 .p-sub{font-size:15px;color:var(--muted);max-width:460px;margin:0 auto 1.5rem;line-height:1.6}
-.p-tagline{
-  display:inline-block;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);
-  color:var(--green);padding:6px 16px;border-radius:20px;font-size:12.5px;font-weight:600;
-  margin-bottom:1.5rem
-}
+.p-tagline{display:inline-block;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green);padding:6px 16px;border-radius:20px;font-size:12.5px;font-weight:600;margin-bottom:1.5rem}
 .t-badges{display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap}
 .t-badge{font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:5px}
-.p-cards{
-  display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;
-  max-width:1050px;margin:0 auto;padding:1rem 1.5rem 4rem;align-items:start
-}
-.pc{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);
-  padding:1.75rem;position:relative;transition:transform .2s,border-color .2s
-}
+.p-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1050px;margin:0 auto;padding:1rem 1.5rem 4rem;align-items:start}
+.pc{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;position:relative;transition:transform .2s,border-color .2s}
 .pc:hover{transform:translateY(-3px)}
-.pc.pro{
-  border-color:var(--gold-b);background:rgba(245,166,35,.03);transform:translateY(-6px)
-}
+.pc.pro{border-color:var(--gold-b);background:rgba(245,166,35,.03);transform:translateY(-6px)}
 .pc.pro:hover{transform:translateY(-9px)}
-.pop-tag{
-  position:absolute;top:-13px;left:50%;transform:translateX(-50%);
-  background:var(--gold);color:#000;font-size:10px;font-weight:800;
-  padding:3px 16px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap
-}
+.pop-tag{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:var(--gold);color:#000;font-size:10px;font-weight:800;padding:3px 16px;border-radius:20px;letter-spacing:.08em;text-transform:uppercase;white-space:nowrap}
 .p-tier{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.75rem}
 .p-tier.s,.p-tier.p{color:var(--gold)}
 .p-tier.e{color:var(--muted)}
@@ -276,39 +163,32 @@ nav{
 .p-num{font-size:42px;font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1}
 .p-per{font-size:14px;color:var(--muted)}
 .p-desc{font-size:12.5px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5}
-.v-callout{
-  background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);
-  border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gold);
-  margin-bottom:1.1rem;display:flex;align-items:center;gap:6px
-}
+.v-callout{background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gold);margin-bottom:1.1rem;display:flex;align-items:center;gap:6px}
 .pf{list-style:none;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:8px}
 .pf li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);line-height:1.4}
-.chk{
-  width:17px;height:17px;border-radius:50%;background:rgba(16,185,129,.15);
-  color:var(--green);display:flex;align-items:center;justify-content:center;
-  font-size:9px;flex-shrink:0;margin-top:1px
-}
-.pcta{
-  width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;
-  cursor:pointer;font-family:inherit;transition:all .2s;text-decoration:none;
-  display:block;text-align:center;border:none;letter-spacing:.01em
-}
+.chk{width:17px;height:17px;border-radius:50%;background:rgba(16,185,129,.15);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px}
+.pcta{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;text-decoration:none;display:block;text-align:center;border:none;letter-spacing:.01em}
 .pcta.cs,.pcta.ce{background:transparent;border:1px solid var(--border);color:var(--text)}
 .pcta.cs:hover,.pcta.ce:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.04)}
 .pcta.cp{background:var(--gold);color:#000;font-weight:700}
 .pcta.cp:hover{background:var(--gold-h)}
 .cta-note{font-size:11.5px;color:var(--dim);text-align:center;margin-top:6px}
-
-/* ── ADMIN PAGE ── */
+ 
+/* FOUNDER SECTION */
+.founder-section{max-width:760px;margin:0 auto;padding:0 1.5rem 3rem}
+.founder-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;display:flex;gap:1.25rem;align-items:flex-start}
+.founder-avatar{width:54px;height:54px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#000;flex-shrink:0}
+.founder-name{font-size:15px;font-weight:700;margin-bottom:3px}
+.founder-role{font-size:12px;color:var(--gold);margin-bottom:.6rem}
+.founder-bio{font-size:13px;color:var(--muted);line-height:1.65}
+ 
+/* ADMIN */
 #screen-admin.on{display:block;padding-top:60px}
 .admin-wrap{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
 .admin-title{font-size:24px;font-weight:700;margin-bottom:.5rem}
 .admin-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
 .admin-table{width:100%;border-collapse:collapse;font-size:13px}
-.admin-table th{
-  text-align:left;padding:10px 14px;background:var(--bg-card2);
-  border:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em
-}
+.admin-table th{text-align:left;padding:10px 14px;background:var(--bg-card2);border:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
 .admin-table td{padding:10px 14px;border:1px solid var(--border);color:var(--text);vertical-align:top}
 .admin-table tr:hover td{background:rgba(255,255,255,.02)}
 .admin-empty{text-align:center;padding:2rem;color:var(--dim);font-size:13px}
@@ -316,113 +196,56 @@ nav{
 .stat-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:1rem 1.25rem;flex:1;min-width:140px}
 .stat-val{font-size:28px;font-weight:800;color:var(--gold)}
 .stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
-.admin-logout{
-  background:none;border:1px solid var(--border);border-radius:8px;
-  padding:6px 14px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit
-}
+.admin-logout{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit}
 .admin-logout:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
 .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
-
-/* ── ADMIN LOGIN ── */
-.admin-login{
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  min-height:calc(100vh - 60px);padding:2rem
-}
-.admin-login-card{
-  background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);
-  padding:2rem;max-width:340px;width:100%;text-align:center
-}
+.admin-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 60px);padding:2rem}
+.admin-login-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:2rem;max-width:340px;width:100%;text-align:center}
 .admin-login-card h2{font-size:20px;font-weight:700;margin-bottom:.5rem}
 .admin-login-card p{font-size:13px;color:var(--muted);margin-bottom:1.25rem}
-.admin-login-card input{
-  width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);
-  border-radius:9px;padding:11px 14px;font-size:14px;color:var(--text);
-  font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px
-}
+.admin-login-card input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px}
 .admin-login-card input:focus{border-color:var(--gold-b)}
-.admin-login-card button{
-  width:100%;padding:12px;background:var(--gold);border:none;border-radius:9px;
-  font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#000
-}
+.admin-login-card button{width:100%;padding:12px;background:var(--gold);border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#000}
 .admin-login-card button:hover{background:var(--gold-h)}
 .admin-login-err{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
-
-/* ── MODAL ── */
-.mo{
-  position:fixed;inset:0;background:rgba(0,0,0,.87);display:flex;
-  align-items:center;justify-content:center;z-index:500;padding:1rem;
-  opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px)
-}
+ 
+/* UPGRADE MODAL */
+.mo{position:fixed;inset:0;background:rgba(0,0,0,.87);display:flex;align-items:center;justify-content:center;z-index:500;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px)}
 .mo.on{opacity:1;pointer-events:all}
-.mb2{
-  background:var(--bg-card);border:1px solid var(--border-g);border-radius:var(--rl);
-  padding:2rem;max-width:460px;width:100%;transform:translateY(16px);transition:transform .25s;
-  max-height:calc(100vh - 2rem);overflow-y:auto
-}
+.mb2{background:var(--bg-card);border:1px solid var(--border-g);border-radius:var(--rl);padding:2rem;max-width:460px;width:100%;transform:translateY(16px);transition:transform .25s;max-height:calc(100vh - 2rem);overflow-y:auto}
 .mo.on .mb2{transform:translateY(0)}
 .m-title{font-size:21px;font-weight:700;margin-bottom:.5rem}
 .m-sub{font-size:13.5px;color:var(--muted);margin-bottom:1.4rem;line-height:1.6}
-.m-close{
-  width:100%;background:none;border:none;color:var(--dim);font-size:13px;
-  cursor:pointer;font-family:inherit;padding:8px;margin-top:8px;
-  text-decoration:underline;text-decoration-color:var(--dim)
-}
+.m-close{width:100%;background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;font-family:inherit;padding:8px;margin-top:8px;text-decoration:underline;text-decoration-color:var(--dim)}
 .m-close:hover{color:var(--muted)}
 .upgrade-plans{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
-.up-row{
-  display:flex;align-items:center;justify-content:space-between;
-  background:rgba(255,255,255,.03);border:1px solid var(--border);
-  border-radius:10px;padding:11px 15px;cursor:pointer;transition:all .15s;
-  text-decoration:none;color:var(--text)
-}
+.up-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:11px 15px;cursor:pointer;transition:all .15s;text-decoration:none;color:var(--text)}
 .up-row:hover{border-color:var(--gold-b);background:var(--gold-dim)}
 .up-row.popular{border-color:var(--gold-b)}
 .up-name{font-size:14px;font-weight:600}
 .up-price{font-size:14px;font-weight:700;color:var(--gold)}
 .pop-badge{font-size:10px;background:var(--gold);color:#000;padding:2px 8px;border-radius:10px;font-weight:700;margin-left:6px}
-
-/* ── FOOTER ── */
-.footer{
-  background:var(--bg-card);border-top:1px solid var(--border);
-  padding:1.25rem 1.5rem;text-align:center;font-size:12px;color:var(--dim)
-}
+ 
+/* FOOTER */
+.footer{background:var(--bg-card);border-top:1px solid var(--border);padding:1.25rem 1.5rem;text-align:center;font-size:12px;color:var(--dim)}
 .footer a{color:var(--gold);text-decoration:none}
 .footer a:hover{text-decoration:underline}
-
-/* ── WHATSAPP FLOAT ── */
-.wa-btn{
-  position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;
-  width:52px;height:52px;background:#f5a623;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 4px 20px rgba(37,211,102,.4);cursor:pointer;
-  transition:transform .2s,box-shadow .2s;text-decoration:none
-}
-.wa-btn:hover{transform:scale(1.08);box-shadow:0 6px 28px rgba(37,211,102,.55)}
+ 
+/* EMAIL FLOAT */
+.wa-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;width:52px;height:52px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(245,166,35,.3);cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none}
+.wa-btn:hover{transform:scale(1.08)}
 .wa-btn svg{width:28px;height:28px;fill:#fff}
-.wa-tooltip{
-  position:absolute;right:60px;top:50%;transform:translateY(-50%);
-  background:var(--bg-card);border:1px solid var(--border);border-radius:8px;
-  padding:6px 11px;font-size:12px;color:var(--text);white-space:nowrap;
-  pointer-events:none;opacity:0;transition:opacity .2s
-}
+.wa-tooltip{position:absolute;right:60px;top:50%;transform:translateY(-50%);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 11px;font-size:12px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
 .wa-btn:hover .wa-tooltip{opacity:1}
-
-/* ── TOAST ── */
-.toast{
-  position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%) translateY(80px);
-  background:var(--bg-card);border:1px solid rgba(248,113,113,.4);color:var(--red);
-  padding:10px 20px;border-radius:10px;font-size:13px;z-index:999;
-  transition:transform .3s ease;white-space:nowrap;pointer-events:none;
-  box-shadow:0 4px 16px rgba(0,0,0,.4)
-}
+ 
+/* TOAST */
+.toast{position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg-card);border:1px solid rgba(248,113,113,.4);color:var(--red);padding:10px 20px;border-radius:10px;font-size:13px;z-index:999;transition:transform .3s ease;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .toast.good{border-color:rgba(16,185,129,.4);color:var(--green)}
 .toast.show{transform:translateX(-50%) translateY(0)}
-
-/* ── ANIMATIONS ── */
+ 
 @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes tb{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
-
-/* ── RESPONSIVE ── */
+ 
 @media(max-width:700px){
   .p-cards{grid-template-columns:1fr}
   .pc.pro{transform:none}
@@ -434,15 +257,13 @@ nav{
   .mb2{padding:1.5rem}
   .admin-stats{flex-direction:column}
   .demo-btn{display:none}
+  .founder-card{flex-direction:column}
 }
-@media(max-width:480px){
-  .suggs{grid-template-columns:1fr}
-  .mu,.ma{max-width:92%}
-}
+@media(max-width:480px){.suggs{grid-template-columns:1fr}.mu,.ma{max-width:92%}}
 </style>
 </head>
 <body>
-
+ 
 <!-- NAV -->
 <nav id="main-nav" style="display:none">
   <a class="n-logo" onclick="goScreen('chat')">
@@ -455,152 +276,177 @@ nav{
     <button class="n-btn" id="nb-pricing" onclick="goScreen('pricing')">Pricing</button>
   </div>
 </nav>
-
-<!-- ═══ SCREEN: EMAIL GATE ═══ -->
+ 
+<!-- EMAIL GATE -->
 <div class="screen on" id="screen-gate" style="background:var(--bg)">
   <div class="gate-wrap">
     <div class="gate-card">
       <div class="gate-icon">W</div>
       <h1 class="gate-title">WealthPilot AI</h1>
-      <p class="gate-sub">Expert AI guidance for independent financial advisors — 401k, IRA, portfolio strategy, tax optimization &amp; more.</p>
+      <p class="gate-sub">AI-powered tax and retirement research for NAPFA-listed fee-only CFPs. IRS-cited sources. Verify before client use.</p>
       <div class="gate-badge">&#127381; Early Access — Free for 14 Days</div>
+      <div class="trust-row">
+        <span class="trust-badge">&#10003; IRS-Cited Sources</span>
+        <span class="trust-badge">&#10003; No Client Data Stored</span>
+        <span class="trust-badge">&#10003; Built for NAPFA Advisors</span>
+      </div>
       <form class="gate-form" id="gate-form">
         <input type="text" id="g-name" placeholder="Your full name" autocomplete="name" required>
         <input type="email" id="g-email" placeholder="Work email address" autocomplete="email" required>
         <label class="gate-check">
           <input type="checkbox" id="g-consent" required>
-          <span>I agree to receive updates and news from WealthPilot</span>
+          <span>I agree to receive updates and important notices from WealthPilot</span>
         </label>
-        <div class="gate-err" id="gate-err">Please fill in all fields and agree to continue.</div>
+        <div class="gate-err" id="gate-err"></div>
         <button type="button" class="gate-submit" onclick="submitGate(event)">Get Free Access &rarr;</button>
       </form>
-      <p class="gate-privacy">&#128274; Your data is never sold or shared with third parties.</p>
+      <p class="gate-privacy">&#128274; No client data collected. No data sold. <a href="/privacy.html" style="color:var(--gold)">Privacy Policy</a></p>
     </div>
   </div>
   <footer class="footer">
     &copy; 2026 WealthPilot &mdash; Founded 2026 &mdash;
-    <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a> &mdash;
-    Built for independent financial advisors
+    <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash;
+    <a href="/privacy.html">Privacy Policy</a> &middot;
+    <a href="/terms.html">Terms of Service</a> &middot;
+    Built for fee-only financial advisors
   </footer>
 </div>
-
-<!-- ═══ SCREEN: CHAT ═══ -->
+ 
+<!-- CHAT -->
 <div class="screen" id="screen-chat">
   <div class="chat-inner">
-    <div class="disc-inline">
-      &#9888;&#65039; <strong>Educational purposes only</strong> &mdash; Not SEC/FINRA registered investment advice. Always consult a licensed professional.
+    <div class="disc-inline" id="disc-banner">
+      &#9888;&#65039; <strong>Research tool only — not financial advice.</strong> All outputs reference IRS, SSA, or Medicare sources. Verify before client use. &nbsp;|&nbsp; <a href="/terms.html" style="color:#ffe08a">Terms</a>
+      <button class="disc-dismiss" onclick="dismissDisc()" title="Dismiss">&#10005;</button>
     </div>
     <div class="u-bar" id="ubar" style="display:none">
       <div class="u-left">
-        <span>Questions today:</span>
+        <span>Queries remaining:</span>
         <span class="u-num" id="unum">5</span>
-        <span>remaining today</span>
+        <span id="u-period">today</span>
       </div>
       <div class="u-track"><div class="u-fill" id="ufill" style="width:100%"></div></div>
       <span class="u-up" onclick="openUpgradeModal()">Upgrade &rarr;</span>
     </div>
+    <div class="rate-bar" id="rate-bar">&#128683; Rate limit: please wait <span id="rate-countdown">60</span>s before sending another query.</div>
     <div class="msgs" id="msgs">
       <div class="w-state" id="ws">
         <div class="w-ring">&#128188;</div>
-        <div class="w-title">WealthPilot AI Reseach Assistant</div>
-        <div class="w-tagline">Built for independent financial advisors</div>
-        <p class="w-sub">Ask me anything about US markets, portfolio strategy, tax optimization, retirement planning, or client wealth management.</p>
+        <div class="w-title">WealthPilot AI Research Assistant</div>
+        <div class="w-tagline">Built for NAPFA-listed fee-only advisors</div>
+        <p class="w-sub">Ask me anything about Roth conversions, IRMAA planning, Social Security timing, RMDs, tax-loss harvesting, or retirement withdrawal strategy. All answers cite IRS and SSA sources.</p>
         <div class="suggs">
-          <button class="s-btn" onclick="qs('What tax-advantaged accounts should I recommend for a high-income client in the 37% bracket?')">&#127970; Tax-advantaged accounts for high earners</button>
-          <button class="s-btn" onclick="qs('How should I approach portfolio rebalancing during high inflation?')">&#128202; Portfolio rebalancing in high inflation</button>
-          <button class="s-btn" onclick="qs('Explain the backdoor Roth IRA strategy and current income limits')">&#128161; Backdoor Roth IRA strategy</button>
-          <button class="s-btn" onclick="qs('What are the best low-cost index funds for a 30-year retirement horizon?')">&#128200; Best index funds for retirement</button>
+          <button class="s-btn" onclick="qs('What are the 2024 IRMAA thresholds and how does a Roth conversion affect them?')">&#127970; IRMAA thresholds and Roth conversions</button>
+          <button class="s-btn" onclick="qs('Explain the optimal Social Security claiming strategy for a married couple at full retirement age')">&#128202; Social Security claiming strategy</button>
+          <button class="s-btn" onclick="qs('What is the backdoor Roth IRA strategy and what are the current pro-rata rule considerations?')">&#128161; Backdoor Roth IRA and pro-rata rule</button>
+          <button class="s-btn" onclick="qs('What are the RMD rules for inherited IRAs after the SECURE 2.0 Act?')">&#128200; Inherited IRA RMD rules post-SECURE 2.0</button>
         </div>
       </div>
       <div class="tdots" id="tdots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
     </div>
     <div class="i-wrap">
       <div class="i-row">
-        <textarea id="mi" placeholder="Ask about investments, tax strategies, retirement planning..." rows="1" onkeydown="hk(event)" oninput="ag(this)"></textarea>
+        <textarea id="mi" placeholder="Ask about tax strategies, Roth conversions, RMDs, IRMAA, Social Security..." rows="1" onkeydown="hk(event)" oninput="ag(this);updateCharCount(this)"></textarea>
         <div class="i-actions">
-          <button class="demo-btn" onclick="bookDemo()">&#128197; Book a call </button>
+          <button class="demo-btn" onclick="bookDemo()">&#128197; Book a call</button>
           <button id="sb" onclick="send()">&#10148;</button>
         </div>
       </div>
-      <div class="i-hint">Educational purposes only &middot; Not SEC-registered investment advice</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <div class="i-hint">Research only &middot; Verify all outputs &middot; <a href="/terms.html" style="color:var(--dim)">Terms</a></div>
+        <div class="char-counter" id="char-counter">0 / 500</div>
+      </div>
     </div>
   </div>
   <footer class="footer">
-    &#128274; Privacy First &mdash; No data stored beyond your session &mdash;
-    <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a> &mdash;
-    Founded 2026 &mdash; WealthPilot
+    &#128274; No client data stored &mdash;
+    <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash;
+    <a href="/privacy.html">Privacy Policy</a> &middot;
+    <a href="/terms.html">Terms of Service</a> &mdash;
+    &copy; 2026 WealthPilot
   </footer>
 </div>
-
-<!-- ═══ SCREEN: PRICING ═══ -->
+ 
+<!-- PRICING -->
 <div class="screen" id="screen-pricing">
   <div class="p-hero">
     <h1 class="p-title">Simple, Transparent Pricing</h1>
-    <p class="p-sub">No hidden fees. No long-term contracts. The AI investment knowledge edge your clients expect.</p>
-    <div class="p-tagline">&#10003; Be among the first advisors to experience WealthPilot &mdash; early access now open</div>
+    <p class="p-sub">No hidden fees. No long-term contracts. Research-grade AI for the CFPs who need it most.</p>
+    <div class="p-tagline">&#10003; Early access open — NAPFA-listed advisors only</div>
     <div class="t-badges">
-      <span class="t-badge">&#128274; Privacy First &mdash; No data stored beyond your session</span>
+      <span class="t-badge">&#128274; No client data stored</span>
       <span class="t-badge">&#8617; 14-day money-back guarantee</span>
       <span class="t-badge">&#10005; Cancel anytime</span>
-      <span class="t-badge">&#9889; Quick setup &mdash; we handle everything</span>
+      <span class="t-badge">&#9889; IRS-cited sources</span>
     </div>
   </div>
   <div class="p-cards">
-    <!-- Starter -->
     <div class="pc">
       <div class="p-tier s">STARTER</div>
       <div class="p-price"><span class="p-num">$199</span><span class="p-per">/mo</span></div>
-      <p class="p-desc">Perfect for independent advisors getting started</p>
+      <p class="p-desc">For solo CFPs getting started with AI-assisted research</p>
       <ul class="pf">
-        <li><span class="chk">&#10003;</span>AI investment chatbot</li>
-        <li><span class="chk">&#10003;</span>Unlimited conversations</li>
-        <li><span class="chk">&#10003;</span>Basic branding</li>
+        <li><span class="chk">&#10003;</span>30 research queries/month</li>
+        <li><span class="chk">&#10003;</span>IRS and SSA source citations</li>
+        <li><span class="chk">&#10003;</span>Roth, RMD, IRMAA, SS coverage</li>
         <li><span class="chk">&#10003;</span>Email support</li>
       </ul>
       <a class="pcta cs" href="https://wise.com/pay/r/1o6PoRc62rCf0t8" target="_blank">Get Started</a>
     </div>
-    <!-- Professional -->
     <div class="pc pro">
       <div class="pop-tag">MOST POPULAR</div>
       <div class="p-tier p">PROFESSIONAL</div>
       <div class="p-price"><span class="p-num">$299</span><span class="p-per">/mo</span></div>
-      <p class="p-desc">Built for advisors serving growing client bases</p>
-      <div class="v-callout">&#9200;  Built specifically for retirement &amp; tax planning research</div>
+      <p class="p-desc">For advisors with active retirement and tax planning practices</p>
+      <div class="v-callout">&#9200; Built specifically for retirement &amp; tax planning research</div>
       <ul class="pf">
+        <li><span class="chk">&#10003;</span>100 research queries/month</li>
         <li><span class="chk">&#10003;</span>Everything in Starter</li>
-        <li><span class="chk">&#10003;</span>Unlimited conversations</li>
         <li><span class="chk">&#10003;</span>Custom branding and logo</li>
         <li><span class="chk">&#10003;</span>Your domain deployment</li>
-        <li><span class="chk">&#10003;</span>Priority mail support</li>
-        <li><span class="chk">&#10003;</span>14-day money-back gurantee</li>
+        <li><span class="chk">&#10003;</span>Priority email support</li>
+        <li><span class="chk">&#10003;</span>14-day money-back guarantee</li>
       </ul>
-     <a class="pcta cp" href="https://wise.com/pay/r/rOIL702LDK-xt_s" target="_blank">Get Started</a>
-  
+      <a class="pcta cp" href="https://wise.com/pay/r/rOIL702LDK-xt_s" target="_blank">Get Started</a>
     </div>
-    <!-- Enterprise -->
     <div class="pc">
-     <div class="p-tier e">ENTERPRISE</div>
+      <div class="p-tier e">ENTERPRISE</div>
       <div class="p-price"><span class="p-num">$599</span><span class="p-per">/mo</span></div>
       <p class="p-desc">For growing RIA practices needing white-label branding and team access</p>
       <ul class="pf">
+        <li><span class="chk">&#10003;</span>Unlimited queries</li>
         <li><span class="chk">&#10003;</span>Everything in Professional</li>
         <li><span class="chk">&#10003;</span>White-label branding (your logo + colors)</li>
-        <li><span class="chk">&#10003;</span>Custom system prompt for your firm's focus areas</li>
-        <li><span class="chk">&#10003;</span>Dedicated Priority support</li>
+        <li><span class="chk">&#10003;</span>Custom system prompt for your firm</li>
         <li><span class="chk">&#10003;</span>Manual onboarding by founder</li>
       </ul>
-     <a class="pcta ce" href="https://wise.com/pay/r/hfmR5ahm1avq2uI" target="_blank">Contact Us</a>
+      <a class="pcta ce" href="mailto:support@wealthpilot.co?subject=WealthPilot Enterprise" target="_blank">Contact Us</a>
+    </div>
   </div>
+ 
+  <!-- FOUNDER SECTION -->
+  <div class="founder-section">
+    <div class="founder-card">
+      <div class="founder-avatar">B</div>
+      <div>
+        <div class="founder-name">Babar — Founder, WealthPilot</div>
+        <div class="founder-role">Solo founder &middot; B.Sc. (Hons) Statistics &middot; Built for NAPFA advisors</div>
+        <div class="founder-bio">WealthPilot is an independent, self-funded research tool. No venture capital. No data selling. No ads. Built specifically for fee-only CFPs who need defensible, IRS-cited AI research — not a generic chatbot. If you have questions, you're talking directly to the person who built it: <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a></div>
+      </div>
+    </div>
+  </div>
+ 
   <footer class="footer">
-    &#128274; Privacy First &mdash; No data stored beyond your session &mdash;
-    <a href="mailto:babar.wealthpilot@gmail.com?subject=WealthPilot...Enterprise...">Contact Us</a>
-    Founded 2026 &mdash; WealthPilot
+    &#128274; No client data stored &mdash;
+    <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash;
+    <a href="/privacy.html">Privacy Policy</a> &middot;
+    <a href="/terms.html">Terms of Service</a> &mdash;
+    &copy; 2026 WealthPilot
   </footer>
 </div>
-
-<!-- ═══ SCREEN: ADMIN ═══ -->
+ 
+<!-- ADMIN -->
 <div class="screen" id="screen-admin">
-  <!-- Login state -->
   <div class="admin-login" id="admin-login">
     <div class="admin-login-card">
       <h2>&#128274; Admin Access</h2>
@@ -610,7 +456,6 @@ nav{
       <button onclick="adminLogin()">Access Dashboard</button>
     </div>
   </div>
-  <!-- Dashboard state -->
   <div id="admin-dash" style="display:none">
     <div class="admin-wrap">
       <div class="admin-header">
@@ -622,189 +467,319 @@ nav{
       </div>
       <div class="admin-stats" id="admin-stats"></div>
       <table class="admin-table" id="admin-table">
-        <thead>
-          <tr>
-            <th>#</th><th>Name</th><th>Email</th><th>Consent</th><th>Date &amp; Time</th><th>Status</th>
-          </tr>
-        </thead>
+        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Consent</th><th>Date &amp; Time</th><th>Status</th></tr></thead>
         <tbody id="admin-tbody"></tbody>
       </table>
     </div>
   </div>
 </div>
-
-<!-- MODAL -->
+ 
+<!-- UPGRADE MODAL -->
 <div class="mo" id="mo"><div class="mb2" id="mb2"></div></div>
-
-<!-- WHATSAPP FLOAT -->
-<a class="wa-btn" href="mailto:babar.wealthpilot@gmail.com" target="_blank" rel="noopener" id="wa-float" style="display:none">
+ 
+<!-- EMAIL FLOAT -->
+<a class="wa-btn" href="mailto:support@wealthpilot.co" target="_blank" rel="noopener" id="wa-float" style="display:none">
   <div class="wa-tooltip">Email founder</div>
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-  <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
-</svg>
+  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
 </a>
-
-<!-- TOAST -->
+ 
 <div class="toast" id="toast"></div>
-
+ 
 <script>
-// ─────────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────────
-
-const ANTHROPIC_EP = 'https://empty-block-1f07.babar-wealthpilot.workers.dev';
-const ACCESS_DAYS = 14;
-
-const PLAN_LIMITS = {
-  trial:        5,
-  starter:      30,
-  professional: 60,
-  enterprise:   999
+// ─────────────────────────────────────────
+// AGENT 4: AI PROVIDER ABSTRACTION
+// API key MUST live in Cloudflare Worker env vars only — never here
+// To switch providers: change AI_CONFIG.provider and endpoint
+// ─────────────────────────────────────────
+const AI_CONFIG = {
+  provider: 'anthropic', // switch to 'openai' etc by changing endpoint + payload shape below
+  endpoint: 'https://empty-block-1f07.babar-wealthpilot.workers.dev',
+  model: 'claude-sonnet-4-5',
+  maxTokens: 1024
 };
-
-function getUserPlan() {
-  const email = localStorage.getItem('wp_user_email');
-  if (!email) return 'trial';
-  const leads = JSON.parse(
-    localStorage.getItem('wp_leads') || '[]'
-  );
-  const lead = leads.find(l => l.email === email);
-  if (!lead) return 'trial';
-  if (!isInTrial(lead.ts)) return 'trial';
-  return lead.plan || 'trial';
+ 
+async function getAIResponse(messages, systemPrompt) {
+  // AGENT 4: provider abstraction — all AI calls go through here only
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
+  try {
+    const res = await fetch(AI_CONFIG.endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: AI_CONFIG.model,
+        max_tokens: AI_CONFIG.maxTokens,
+        system: systemPrompt,
+        messages: messages
+      })
+    });
+    clearTimeout(timeout);
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error('API_ERROR:' + (errData.error?.message || res.status));
+    }
+    const data = await res.json();
+    if (!data.content || !data.content[0] || !data.content[0].text) {
+      throw new Error('EMPTY_RESPONSE');
+    }
+    return data.content[0].text;
+  } catch(e) {
+    clearTimeout(timeout);
+    throw e;
+  }
 }
-
-const FREE_LIMIT = PLAN_LIMITS[getUserPlan()];
+ 
+// ─────────────────────────────────────────
+// AGENT 3: PLAN & BILLING SYSTEM
+// ─────────────────────────────────────────
+ 
+// STRIPE WEBHOOK HANDLER — implement server-side in Cloudflare Worker:
+// POST /webhook/stripe
+// Verify: stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET)
+// On event 'checkout.session.completed':
+//   const { email, plan, paid_at, expires_at } = session.metadata
+//   Store in Supabase: { email, plan, paid_at, expires_at }
+//   Set response header to user's browser via redirect URL param: ?plan=professional&token=...
+ 
+const PLAN_CONFIG = {
+  free:         { limit: 5,   period: 'total',  label: 'Free Trial' },
+  starter:      { limit: 30,  period: 'month',  label: 'Starter' },
+  professional: { limit: 100, period: 'month',  label: 'Professional' },
+  enterprise:   { limit: 9999,period: 'month',  label: 'Enterprise' }
+};
+ 
+function getUserPlan() {
+  // AGENT 3: never throws — always returns a valid string
+  try {
+    // 1. Check URL param (set after Stripe/Wise payment redirect)
+    const urlParam = new URLSearchParams(window.location.search).get('plan');
+    if (urlParam && PLAN_CONFIG[urlParam]) {
+      localStorage.setItem('wp_plan', urlParam);
+      return urlParam;
+    }
+    // 2. Check localStorage
+    const stored = localStorage.getItem('wp_plan');
+    if (stored && PLAN_CONFIG[stored]) return stored;
+    // 3. Default
+    return 'free';
+  } catch(e) {
+    return 'free';
+  }
+}
+ 
+function getPlanLimit() {
+  return PLAN_CONFIG[getUserPlan()].limit;
+}
+ 
+function getPlanPeriod() {
+  return PLAN_CONFIG[getUserPlan()].period;
+}
+ 
+// Usage keys — monthly for paid plans, lifetime for free
+const usageKey = () => {
+  if (getPlanPeriod() === 'total') return 'wp_u_lifetime';
+  return 'wp_u_' + new Date().getFullYear() + '_' + new Date().getMonth();
+};
+const getUsed = () => parseInt(localStorage.getItem(usageKey()) || '0', 10);
+const addUsed = () => localStorage.setItem(usageKey(), getUsed() + 1);
+const getRemaining = () => Math.max(0, getPlanLimit() - getUsed());
+ 
+// ─────────────────────────────────────────
+// AGENT 4: RATE LIMITING (10 req/min per session)
+// ─────────────────────────────────────────
+const rateLimiter = {
+  requests: [],
+  maxPerMin: 10,
+  cooldownTimer: null,
+ 
+  canSend() {
+    const now = Date.now();
+    this.requests = this.requests.filter(t => now - t < 60000);
+    return this.requests.length < this.maxPerMin;
+  },
+ 
+  record() {
+    this.requests.push(Date.now());
+  },
+ 
+  secondsUntilReset() {
+    if (!this.requests.length) return 0;
+    const oldest = Math.min(...this.requests);
+    return Math.ceil((60000 - (Date.now() - oldest)) / 1000);
+  },
+ 
+  showCooldown() {
+    const bar = document.getElementById('rate-bar');
+    bar.style.display = 'block';
+    let secs = this.secondsUntilReset();
+    document.getElementById('rate-countdown').textContent = secs;
+    clearInterval(this.cooldownTimer);
+    this.cooldownTimer = setInterval(() => {
+      secs--;
+      if (secs <= 0) {
+        bar.style.display = 'none';
+        clearInterval(this.cooldownTimer);
+      } else {
+        document.getElementById('rate-countdown').textContent = secs;
+      }
+    }, 1000);
+  }
+};
+ 
+// ─────────────────────────────────────────
+// AGENT 4: INPUT SANITISATION
+// ─────────────────────────────────────────
+const MAX_QUERY_LENGTH = 500;
+ 
+function sanitizeInput(text) {
+  // Strip HTML tags
+  const div = document.createElement('div');
+  div.appendChild(document.createTextNode(text));
+  let clean = div.innerHTML;
+  // Trim and enforce max length
+  return clean.trim().substring(0, MAX_QUERY_LENGTH);
+}
+ 
+function updateCharCount(el) {
+  const len = el.value.length;
+  const counter = document.getElementById('char-counter');
+  counter.textContent = len + ' / ' + MAX_QUERY_LENGTH;
+  counter.className = 'char-counter' + (len > 450 ? (len >= 500 ? ' over' : ' warn') : '');
+  if (len > MAX_QUERY_LENGTH) el.value = el.value.substring(0, MAX_QUERY_LENGTH);
+}
+ 
+// ─────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────
+const ACCESS_DAYS = 14;
 const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
-
-const SYS = `You are WealthPilot, an expert AI investment guide for US financial advisors and their clients.
-
-Expertise: US equities (S&P 500, NASDAQ, sector analysis), fixed income, tax optimization (401k/IRA/Roth/backdoor Roth/tax-loss harvesting/capital gains), retirement planning (Social Security, RMDs, safe withdrawal rates), portfolio construction (MPT, factor investing, rebalancing), ETFs/mutual funds/REITs, estate planning, SEC/FINRA regulatory context, macroeconomic analysis.
-
-Style: Professional, specific, concise. Use numbers and thresholds. Structure complex answers with headers and bullets. Note when rules may change. Always remind: educational only, not personalised SEC-registered advice.`;
-
-// ─────────────────────────────────────────────
-// STORAGE HELPERS
-// ─────────────────────────────────────────────
+ 
+const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
+ 
+Expertise: Roth conversions, IRMAA planning, Social Security timing, RMD rules (including SECURE 2.0 changes), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, estate planning, 401k/IRA/HSA rules, capital gains optimization.
+ 
+CRITICAL RULES:
+1. Always cite your source at the end of your answer. Format: "Source: [IRS Publication XXX] [IRC §XXX] [SSA.gov]" — use the most specific applicable reference.
+2. If you are not certain of a specific code section, cite "IRS.gov" generally and note the advisor should verify.
+3. Always end with: "Please verify this information against current IRS guidance before use with clients."
+4. Be specific: use exact dollar thresholds, percentages, and effective dates.
+5. Note when rules are scheduled to change (e.g. TCJA sunset provisions).
+ 
+Style: Professional, precise, structured. Use headers and bullets for complex answers. Never speculate — if you don't know, say so and direct to IRS.gov or SSA.gov.`;
+ 
+// ─────────────────────────────────────────
+// STORAGE
+// ─────────────────────────────────────────
 const LS = {
   get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
   set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
   del: k => localStorage.removeItem(k)
 };
-
-// ─────────────────────────────────────────────
+ 
+// ─────────────────────────────────────────
 // USER / ACCESS
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 function getUser() { return LS.get('wp_user'); }
 function saveUser(u) { LS.set('wp_user', u); }
-
 function isAccessValid() {
   const u = getUser();
   if (!u) return false;
-  const elapsed = Date.now() - u.ts;
-  return elapsed < ACCESS_DAYS * 86400000;
+  return (Date.now() - u.ts) < ACCESS_DAYS * 86400000;
 }
-
-function daysRemaining() {
-  const u = getUser();
-  if (!u) return 0;
-  const elapsed = Date.now() - u.ts;
-  return Math.max(0, ACCESS_DAYS - Math.floor(elapsed / 86400000));
-}
-
-// ─────────────────────────────────────────────
+ 
+// ─────────────────────────────────────────
 // EMAIL GATE
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 function submitGate(e) {
   e.preventDefault();
-  const name    = document.getElementById('g-name').value.trim();
-  const email   = document.getElementById('g-email').value.trim();
+  const name    = sanitizeInput(document.getElementById('g-name').value);
+  const email   = document.getElementById('g-email').value.trim().toLowerCase();
   const consent = document.getElementById('g-consent').checked;
   const err     = document.getElementById('gate-err');
-
+ 
   if (!name || !email || !consent) {
     err.style.display = 'block';
     err.textContent = 'Please fill in all fields and check the consent box.';
     return;
   }
-  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRx.test(email)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     err.style.display = 'block';
     err.textContent = 'Please enter a valid email address.';
     return;
   }
   err.style.display = 'none';
-
+ 
   const user = { name, email, consent, ts: Date.now() };
   saveUser(user);
-
-  // Save to leads locally
   const leads = LS.get('wp_leads') || [];
   leads.push({ ...user, id: Date.now() });
   LS.set('wp_leads', leads);
-
-  // Send email notification to Babar
+ 
   emailjs.send("service_eq5dkmg", "template_sbv9fgi", {
-    to_email: "babar.wealthpilot@gmail.com",
+    to_email: "support@wealthpilot.co",
     from_name: name,
     from_email: email,
     consent: consent ? "Yes" : "No",
     signup_time: new Date().toLocaleString(),
     message: "New WealthPilot signup: " + name + " (" + email + ")"
-  }).catch(() => {}); // Silent fail — don't block user
-
+  }).catch(() => {});
+ 
   enterApp();
 }
-
+ 
 function enterApp() {
   document.getElementById('screen-gate').classList.remove('on');
   document.getElementById('main-nav').style.display = 'flex';
   document.getElementById('wa-float').style.display = 'flex';
   goScreen('chat');
 }
-
-// ─────────────────────────────────────────────
-// USAGE (only after 14-day trial)
-// ─────────────────────────────────────────────
-const dk   = () => 'wp_u_' + new Date().toDateString();
-const used = () => parseInt(localStorage.getItem(dk()) || '0', 10);
-const addU = () => localStorage.setItem(dk(), used() + 1);
-const rem  = () => Math.max(0, FREE_LIMIT - used());
-
+ 
+// ─────────────────────────────────────────
+// DISCLAIMER DISMISS (session only)
+// ─────────────────────────────────────────
+function dismissDisc() {
+  document.getElementById('disc-banner').style.display = 'none';
+  sessionStorage.setItem('disc_dismissed', '1');
+}
+ 
+function initDisc() {
+  if (sessionStorage.getItem('disc_dismissed')) {
+    document.getElementById('disc-banner').style.display = 'none';
+  }
+}
+ 
+// ─────────────────────────────────────────
+// USAGE BAR
+// ─────────────────────────────────────────
 function showUsageBar() {
   const bar = document.getElementById('ubar');
+  const plan = getUserPlan();
+  const limit = getPlanLimit();
+  const r = getRemaining();
   bar.style.display = 'flex';
-  const r = rem();
   document.getElementById('unum').textContent = r;
-  document.getElementById('ufill').style.width = (r / FREE_LIMIT * 100) + '%';
+  document.getElementById('u-period').textContent = getPlanPeriod() === 'total' ? 'remaining (free)' : 'remaining this month';
+  document.getElementById('ufill').style.width = Math.round((r / limit) * 100) + '%';
 }
-
-// ─────────────────────────────────────────────
+ 
+// ─────────────────────────────────────────
 // NAVIGATION
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 function goScreen(s) {
   ['chat','pricing','admin'].forEach(id => {
-    const el = document.getElementById('screen-' + id);
-    el.classList.toggle('on', id === s);
+    document.getElementById('screen-' + id).classList.toggle('on', id === s);
   });
   ['chat','pricing'].forEach(id => {
     const btn = document.getElementById('nb-' + id);
     if (btn) btn.classList.toggle('on', id === s);
   });
   if (s !== 'chat') window.scrollTo(0, 0);
-  if (s === 'chat') updAccessUI();
+  if (s === 'chat') { showUsageBar(); initDisc(); }
 }
-
-function updAccessUI() {
-  showUsageBar();
-}
-
-// ─────────────────────────────────────────────
-// ROUTING — /admin
-// ─────────────────────────────────────────────
+ 
 function checkRoute() {
   if (window.location.pathname.endsWith('/admin') || window.location.hash === '#admin') {
-    // Show admin directly — no nav needed for admin route
     document.getElementById('screen-gate').classList.remove('on');
     document.getElementById('main-nav').style.display = 'flex';
     document.getElementById('wa-float').style.display = 'flex';
@@ -813,12 +788,43 @@ function checkRoute() {
   }
   return false;
 }
-
-// ─────────────────────────────────────────────
+ 
+// ─────────────────────────────────────────
+// UPGRADE MODAL
+// ─────────────────────────────────────────
+function openUpgradeModal() {
+  const plan = getUserPlan();
+  const planLabel = PLAN_CONFIG[plan].label;
+  document.getElementById('mb2').innerHTML = `
+    <div class="m-title">&#128640; Upgrade WealthPilot</div>
+    <p class="m-sub">You've reached your ${planLabel} plan limit. Upgrade to continue your research — we'll respond within a few hours.</p>
+    <div class="upgrade-plans">
+      <a class="up-row" href="https://wise.com/pay/r/1o6PoRc62rCf0t8" target="_blank" onclick="cm()">
+        <div><div class="up-name">Starter</div><div style="font-size:12px;color:var(--muted)">30 queries/month</div></div>
+        <div class="up-price">$199/mo &rarr;</div>
+      </a>
+      <a class="up-row popular" href="https://wise.com/pay/r/rOIL702LDK-xt_s" target="_blank" onclick="cm()">
+        <div><div class="up-name">Professional <span class="pop-badge">POPULAR</span></div><div style="font-size:12px;color:var(--muted)">100 queries/month + custom branding</div></div>
+        <div class="up-price">$299/mo &rarr;</div>
+      </a>
+      <a class="up-row" href="mailto:support@wealthpilot.co?subject=WealthPilot Enterprise" onclick="cm()">
+        <div><div class="up-name">Enterprise</div><div style="font-size:12px;color:var(--muted)">Unlimited + white-label</div></div>
+        <div class="up-price">$599/mo &rarr;</div>
+      </a>
+    </div>
+    <p style="font-size:11.5px;color:var(--dim);text-align:center">After payment, email <a href="mailto:support@wealthpilot.co" style="color:var(--gold)">support@wealthpilot.co</a> with your receipt to activate.</p>
+    <button class="m-close" onclick="cm()">Close</button>`;
+  document.getElementById('mo').classList.add('on');
+}
+ 
+const cm = () => document.getElementById('mo').classList.remove('on');
+document.getElementById('mo').addEventListener('click', e => { if (e.target === document.getElementById('mo')) cm(); });
+ 
+// ─────────────────────────────────────────
 // ADMIN
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 let adminAuthed = false;
-
+ 
 function adminLogin() {
   const pw = document.getElementById('admin-pw').value;
   if (pw === ADMIN_PASS) {
@@ -832,7 +838,7 @@ function adminLogin() {
     document.getElementById('admin-pw').focus();
   }
 }
-
+ 
 function adminLogout() {
   adminAuthed = false;
   document.getElementById('admin-login').style.display = 'flex';
@@ -840,27 +846,19 @@ function adminLogout() {
   document.getElementById('admin-pw').value = '';
   document.getElementById('admin-login-err').style.display = 'none';
 }
-
+ 
 function renderAdminDash() {
   const leads = LS.get('wp_leads') || [];
-  const stats = document.getElementById('admin-stats');
   const now   = Date.now();
   const active = leads.filter(l => (now - l.ts) < ACCESS_DAYS * 86400000).length;
-
-  stats.innerHTML = `
+  document.getElementById('admin-stats').innerHTML = `
     <div class="stat-box"><div class="stat-val">${leads.length}</div><div class="stat-lbl">Total signups</div></div>
     <div class="stat-box"><div class="stat-val">${active}</div><div class="stat-lbl">Active (in trial)</div></div>
-    <div class="stat-box"><div class="stat-val">${leads.filter(l=>l.consent).length}</div><div class="stat-lbl">Consented to contact</div></div>
-  `;
-
+    <div class="stat-box"><div class="stat-val">${leads.filter(l=>l.consent).length}</div><div class="stat-lbl">Consented</div></div>`;
   const tbody = document.getElementById('admin-tbody');
-  if (!leads.length) {
-    tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>';
-    return;
-  }
-
+  if (!leads.length) { tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>'; return; }
   tbody.innerHTML = [...leads].reverse().map((l, i) => {
-    const d   = new Date(l.ts);
+    const d = new Date(l.ts);
     const exp = (Date.now() - l.ts) < ACCESS_DAYS * 86400000;
     const daysLeft = Math.max(0, ACCESS_DAYS - Math.floor((Date.now() - l.ts) / 86400000));
     return `<tr>
@@ -868,83 +866,25 @@ function renderAdminDash() {
       <td><strong>${esc(l.name)}</strong></td>
       <td><a href="mailto:${esc(l.email)}" style="color:var(--gold)">${esc(l.email)}</a></td>
       <td style="color:${l.consent ? 'var(--green)' : 'var(--red)'}">${l.consent ? '&#10003; Yes' : '&#10007; No'}</td>
-      <td style="color:var(--muted)">${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</td>
-      <td style="color:${exp ? 'var(--green)' : 'var(--red)'}">
-        ${exp ? `Trial — ${daysLeft}d left` : 'Expired'}
-      </td>
+      <td style="color:var(--muted)">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
+      <td style="color:${exp ? 'var(--green)' : 'var(--red)'}">${exp ? 'Trial — ' + daysLeft + 'd left' : 'Expired'}</td>
     </tr>`;
   }).join('');
 }
-
-// ─────────────────────────────────────────────
-// UPGRADE MODAL
-// ─────────────────────────────────────────────
-function openUpgradeModal() {
-  document.getElementById('mb2').innerHTML = `
-    <div class="m-title">&#128640; Upgrade WealthPilot</div>
-    <p class="m-sub">Your trial has ended. Email us to unlock continued access — we'll get back to you within a few hours.</p>
-    <div class="upgrade-plans">
-      <a class="up-row" href="mailto:babar.wealthpilot@gmail.com?subject=WealthPilot%20Plan%20Inquiry%20%E2%80%94%20Starter" onclick="cm()">
-        <div><div class="up-name">Starter</div><div style="font-size:12px;color:var(--muted)">Unlimited conversations</div></div>
-        <div class="up-price">$199/mo &rarr;</div>
-      </a>
-      <a class="up-row popular" href="mailto:babar.wealthpilot@gmail.com?subject=WealthPilot%20Plan%20Inquiry%20%E2%80%94%20Professional" onclick="cm()">
-        <div><div class="up-name">Professional <span class="pop-badge">POPULAR</span></div><div style="font-size:12px;color:var(--muted)">Custom branding + domain</div></div>
-        <div class="up-price">$299/mo &rarr;</div>
-      </a>
-      <a class="up-row" href="mailto:babar.wealthpilot@gmail.com?subject=WealthPilot%20Plan%20Inquiry%20%E2%80%94%20Enterprise" onclick="cm()">
-        <div><div class="up-name">Enterprise</div><div style="font-size:12px;color:var(--muted)">White-label branding + team access</div></div>
-        <div class="up-price">$599/mo &rarr;</div>
-      </a>
-    </div>
-    <button class="m-close" onclick="cm()">Close</button>`;
-  document.getElementById('mo').classList.add('on');
-}
-
-const cm = () => document.getElementById('mo').classList.remove('on');
-document.getElementById('mo').addEventListener('click', e => {
-  if (e.target === document.getElementById('mo')) cm();
-});
-
-// ─────────────────────────────────────────────
-// DEMO BOOKING
-// ─────────────────────────────────────────────
-function bookDemo() {
-  window.location.href = 'mailto:babar.wealthpilot@gmail.com?subject=WealthPilot%20Free%20Demo%20Request&body=Hi%2C%20I%27d%20like%20to%20book%20a%20free%2015-minute%20demo%20call%20for%20WealthPilot.%20Please%20let%20me%20know%20your%20availability.';
-}
-
-// ─────────────────────────────────────────────
+ 
+// ─────────────────────────────────────────
 // CHAT ENGINE
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 let hist = [];
-
-async function callAI(userMsg) {
-  hist.push({ role: 'user', content: userMsg });
-
-  const res = await fetch(ANTHROPIC_EP, {
-    method: 'POST',
-    headers: {
-     'content-type':'application/json'
-    },
-    body: JSON.stringify({
-      model: 'claude-sonnet-4-5',
-      max_tokens: 1024,
-      system: SYS,
-      messages: hist
-    })
-  });
-
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error?.message || 'HTTP ' + res.status);
-  }
-
-  const data = await res.json();
-  const reply = data.content[0].text;
-  hist.push({ role: 'assistant', content: reply });
-  return reply;
+ 
+// AGENT 2: extract source citation from AI response
+function extractCitation(text) {
+  const sourceMatch = text.match(/Source:\s*([^\n]+)/i);
+  if (sourceMatch) return sourceMatch[1].trim();
+  if (/IRS|IRC|Publication|Rev\. Rul|SSA|Medicare|CFR/i.test(text)) return null; // citation embedded in text
+  return 'Verify with IRS.gov before client use';
 }
-
+ 
 function fmtAI(text) {
   return text
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
@@ -957,74 +897,108 @@ function fmtAI(text) {
     .replace(/\n\n/g,'<br><br>')
     .replace(/\n/g,'<br>');
 }
-
+ 
 function esc(t) {
   const d = document.createElement('div');
   d.appendChild(document.createTextNode(String(t)));
   return d.innerHTML;
 }
-
+ 
 function addMsg(role, text) {
   const msgs = document.getElementById('msgs');
   const td   = document.getElementById('tdots');
   const ws   = document.getElementById('ws');
   if (ws && ws.style.display !== 'none') ws.style.display = 'none';
-
+ 
   const wrap = document.createElement('div');
   wrap.className = 'msg ' + (role === 'user' ? 'mu' : 'ma');
-
-  const t    = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-  const body = role === 'ai' ? fmtAI(text) : esc(text);
-  wrap.innerHTML = `<div class="mb">${body}</div><div class="mt">${t}</div>`;
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+ 
+  if (role === 'ai') {
+    // AGENT 2: add source citation block
+    const citation = extractCitation(text);
+    const citeHTML = citation
+      ? `<div class="source-cite"><span>&#128204;</span> <strong>Source:</strong> ${esc(citation)}</div>`
+      : '';
+    wrap.innerHTML = `<div class="mb">${fmtAI(text)}${citeHTML}</div><div class="mt">${t} &middot; AI Research &middot; <a href="/terms.html" style="color:var(--dim);font-size:10px">Verify before use</a></div>`;
+  } else {
+    wrap.innerHTML = `<div class="mb">${esc(text)}</div><div class="mt">${t}</div>`;
+  }
+ 
   msgs.insertBefore(wrap, td);
   msgs.scrollTop = msgs.scrollHeight;
 }
-
+ 
 function setTyp(on) {
   const td = document.getElementById('tdots');
   const m  = document.getElementById('msgs');
   td.classList.toggle('on', on);
   if (on) m.scrollTop = m.scrollHeight;
 }
-
+ 
 async function send() {
   const inp  = document.getElementById('mi');
-  const text = inp.value.trim();
+  const raw  = inp.value.trim();
+  if (!raw) return;
+ 
+  // AGENT 3: plan limit check
+  if (getRemaining() <= 0) { openUpgradeModal(); return; }
+ 
+  // AGENT 4: rate limit check
+  if (!rateLimiter.canSend()) {
+    rateLimiter.showCooldown();
+    showToast('Too many requests — please wait a moment.');
+    return;
+  }
+ 
+  // AGENT 4: sanitize input
+  const text = sanitizeInput(raw);
   if (!text) return;
-
-  // 5/day limit for ALL users always
-  if (rem() <= 0) { openUpgradeModal(); return; }
-
+ 
   inp.value = '';
   inp.style.height = 'auto';
+  document.getElementById('char-counter').textContent = '0 / 500';
   addMsg('user', text);
   setTyp(true);
-  addU();
-  updAccessUI();
-
+  addUsed();
+  rateLimiter.record();
+  showUsageBar();
   document.getElementById('sb').disabled = true;
-
+ 
+  hist.push({ role: 'user', content: text });
+ 
   try {
-    const reply = await callAI(text);
+    const reply = await getAIResponse(hist, SYS);
+    hist.push({ role: 'assistant', content: reply });
     setTyp(false);
     addMsg('ai', reply);
-  } catch (err) {
+  } catch(err) {
     setTyp(false);
-    localStorage.setItem(dk(), Math.max(0, used() - 1));
-    updAccessUI();
-    showToast('Connection error: ' + (err.message || 'please try again.'));
+    // AGENT 4: never show raw error to user
+    localStorage.setItem(usageKey(), Math.max(0, getUsed() - 1));
+    showUsageBar();
+    let msg = 'Connection issue — please try again.';
+    if (err.message && err.message.startsWith('API_ERROR')) msg = 'Research service unavailable — please try again shortly.';
+    if (err.message === 'EMPTY_RESPONSE') msg = 'No results found — try rephrasing your question.';
+    if (err.name === 'AbortError') msg = 'Connection timed out — please try again.';
+    showToast(msg);
   }
-
+ 
   document.getElementById('sb').disabled = false;
   inp.focus();
 }
+ 
+function bookDemo() {
+  window.location.href = 'mailto:support@wealthpilot.co?subject=WealthPilot%20Demo%20Request&body=Hi%2C%20I%27d%20like%20to%20book%20a%20free%2015-minute%20demo%20call.%20Please%20let%20me%20know%20your%20availability.';
+}
+ 
 const qs = t => { document.getElementById('mi').value = t; send(); };
 const hk = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 const ag = el => { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
-
-// ─────────────────────────────────────────────
+ 
+// ─────────────────────────────────────────
 // TOAST
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 let toastTimer = null;
 function showToast(msg, good) {
   const el = document.getElementById('toast');
@@ -1033,21 +1007,16 @@ function showToast(msg, good) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 4500);
 }
-
-// ─────────────────────────────────────────────
+ 
+// ─────────────────────────────────────────
 // INIT
-// ─────────────────────────────────────────────
+// ─────────────────────────────────────────
 (function init() {
   if (checkRoute()) return;
-
-  if (isAccessValid()) {
-    enterApp();
-    return;
-  }
-
-  // Show gate
+  if (isAccessValid()) { enterApp(); return; }
   document.getElementById('screen-gate').classList.add('on');
 })();
 </script>
 </body>
 </html>
+ 
