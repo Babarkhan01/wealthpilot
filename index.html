@@ -4,10 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="AI-powered tax and retirement research tool for fee-only CFPs and NAPFA-listed financial advisors. IRS-cited sources. Research assistant only.">
-<meta property="og:title" content="WealthPilot — AI Research Assistant for Fee-Only CFPs">
-<meta property="og:description" content="AI-powered retirement and tax research for independent financial advisors. Not investment advice.">
-<meta property="og:type" content="website">
-<meta name="twitter:card" content="summary_large_image">
 <title>WealthPilot — AI Research Assistant for Financial Advisors</title>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <script>(function(){ emailjs.init({ publicKey: "7NynABxMNuJoxAJNl" }); })();</script>
@@ -24,8 +20,6 @@
 }
 html,body{height:100%}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6}
- 
-/* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);border-bottom:1px solid var(--border);backdrop-filter:blur(12px);height:60px;display:flex;align-items:center;padding:0 1.25rem;justify-content:space-between}
 .n-logo{display:flex;align-items:center;gap:10px;cursor:pointer;text-decoration:none}
 .n-box{width:34px;height:34px;background:var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:16px;color:#000;flex-shrink:0}
@@ -34,44 +28,35 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .ai-pill{background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.07em;display:flex;align-items:center;gap:4px}
 .n-btn{background:none;border:none;color:var(--muted);font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;padding:6px 10px;border-radius:8px;transition:all .15s}
 .n-btn:hover,.n-btn.on{color:var(--text);background:rgba(255,255,255,.06)}
- 
-/* SCREENS */
 .screen{display:none}
 .screen.on{display:flex;flex-direction:column;min-height:100vh}
 #screen-chat.on{height:100vh;overflow:hidden}
- 
-/* EMAIL GATE */
+/* GATE */
 .gate-wrap{flex:1;display:flex;align-items:center;justify-content:center;padding:80px 1.5rem 2rem;background:radial-gradient(ellipse at 50% 30%,rgba(245,166,35,.07) 0%,transparent 70%)}
 .gate-card{background:var(--bg-card);border:1px solid var(--border-g);border-radius:20px;padding:2.5rem;max-width:460px;width:100%;text-align:center}
 .gate-icon{width:72px;height:72px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:#000;margin:0 auto 1.5rem}
 .gate-title{font-size:26px;font-weight:800;margin-bottom:.5rem;letter-spacing:-.02em}
 .gate-sub{font-size:14px;color:var(--muted);margin-bottom:.5rem;line-height:1.6}
-.gate-badge{display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:1.5rem}
+.gate-badge{display:inline-flex;align-items:center;gap:5px;background:var(--gold-dim);border:1px solid var(--gold-b);color:var(--gold);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.05em;margin-bottom:1rem}
+.trust-row{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:1.25rem}
+.trust-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);color:#6ee7b7;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600}
 .gate-form{display:flex;flex-direction:column;gap:12px;text-align:left}
 .gate-form input[type=text],.gate-form input[type=email]{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:10px;padding:12px 15px;font-size:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s}
 .gate-form input:focus{border-color:var(--gold-b)}
 .gate-form input::placeholder{color:var(--dim)}
 .gate-check{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted);cursor:pointer}
-.gate-check input[type=checkbox]{margin-top:2px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0;cursor:pointer}
+.gate-check input[type=checkbox]{margin-top:2px;accent-color:var(--gold);width:16px;height:16px;flex-shrink:0}
 .gate-submit{width:100%;padding:14px;background:var(--gold);border:none;border-radius:11px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;color:#000;transition:background .2s;margin-top:4px}
 .gate-submit:hover{background:var(--gold-h)}
 .gate-err{font-size:12px;color:var(--red);display:none;text-align:center}
 .gate-privacy{font-size:11px;color:var(--dim);text-align:center;margin-top:.75rem}
- 
-/* TRUST BADGES */
-.trust-row{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:1.25rem 0 .5rem}
-.trust-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);color:#6ee7b7;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600}
- 
-/* CHAT LAYOUT */
+.gate-privacy a{color:var(--gold);cursor:pointer;text-decoration:underline}
+/* CHAT */
 #screen-chat.on{padding-top:60px}
 .chat-inner{flex:1;display:flex;flex-direction:column;max-width:860px;width:100%;margin:0 auto;padding:0 1rem;overflow:hidden;height:calc(100vh - 60px)}
- 
-/* AI DISCLAIMER BANNER */
 .disc-inline{background:rgba(124,96,0,0.35);border:1px solid rgba(245,166,35,.25);border-radius:10px;padding:8px 14px;font-size:11.5px;color:#ffe08a;margin-top:.75rem;line-height:1.5;flex-shrink:0;text-align:center;position:relative}
 .disc-dismiss{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;color:#ffe08a;font-size:14px;cursor:pointer;padding:2px 6px;opacity:.6}
 .disc-dismiss:hover{opacity:1}
- 
-/* USAGE BAR */
 .u-bar{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;gap:.75rem;font-size:12px;margin-top:.6rem;flex-shrink:0}
 .u-left{display:flex;align-items:center;gap:6px;color:var(--muted)}
 .u-num{font-weight:700;color:var(--gold)}
@@ -79,16 +64,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .u-fill{height:5px;background:var(--gold);border-radius:4px;transition:width .4s}
 .u-up{font-size:11.5px;color:var(--gold);cursor:pointer;font-weight:600;white-space:nowrap}
 .u-up:hover{text-decoration:underline}
- 
-/* RATE LIMIT BAR */
 .rate-bar{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.25);border-radius:var(--r);padding:7px 14px;font-size:12px;color:#fca5a5;margin-top:.4rem;flex-shrink:0;display:none;text-align:center}
- 
-/* MESSAGES */
 .msgs{flex:1;overflow-y:auto;padding:.875rem 0;display:flex;flex-direction:column;gap:.75rem;scroll-behavior:smooth}
 .msgs::-webkit-scrollbar{width:4px}
 .msgs::-webkit-scrollbar-thumb{background:rgba(255,255,255,.1);border-radius:2px}
- 
-/* WELCOME STATE */
 .w-state{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;text-align:center;padding:2rem 1rem;gap:1rem;animation:fu .4s ease}
 .w-ring{width:64px;height:64px;background:var(--gold-dim);border:2px solid var(--gold-b);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px}
 .w-title{font-size:22px;font-weight:700}
@@ -97,8 +76,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .suggs{display:grid;grid-template-columns:1fr 1fr;gap:7px;width:100%;max-width:520px}
 .s-btn{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;font-size:12.5px;color:var(--muted);cursor:pointer;font-family:inherit;text-align:left;transition:all .15s;line-height:1.4}
 .s-btn:hover{border-color:var(--gold-b);color:var(--text);background:var(--bg-card2)}
- 
-/* MESSAGES */
 .msg{animation:fu .25s ease}
 .mu{align-self:flex-end;max-width:78%}
 .ma{align-self:flex-start;max-width:84%}
@@ -113,23 +90,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .ma .mb p:last-child{margin-bottom:0}
 .mt{font-size:11px;color:var(--dim);margin-top:3px;padding:0 3px}
 .mu .mt{text-align:right}
- 
-/* SOURCE CITATION */
 .source-cite{background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px;font-size:11.5px;color:var(--gold);margin-top:8px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
-.source-cite span{opacity:.7}
- 
-/* TYPING */
 .tdots{display:none;align-items:center;gap:5px;padding:12px 15px;background:var(--bg-card);border:1px solid var(--border);border-radius:3px 13px 13px 13px;width:fit-content}
 .tdots.on{display:flex;animation:fu .2s ease}
 .dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:tb 1.3s infinite ease-in-out}
 .dot:nth-child(2){animation-delay:.18s}
 .dot:nth-child(3){animation-delay:.36s}
- 
-/* INPUT */
 .i-wrap{padding:.75rem 0 .875rem;border-top:1px solid var(--border);flex-shrink:0}
 .i-row{display:flex;gap:8px;align-items:flex-end;background:var(--bg-card);border:1px solid var(--border);border-radius:13px;padding:8px 8px 8px 14px;transition:border-color .2s}
 .i-row:focus-within{border-color:var(--gold-b)}
-.char-counter{font-size:10px;color:var(--dim);text-align:right;padding:3px 4px 0;transition:color .2s}
+.char-counter{font-size:10px;color:var(--dim);transition:color .2s}
 .char-counter.warn{color:#fb923c}
 .char-counter.over{color:var(--red)}
 #mi{flex:1;background:none;border:none;outline:none;font-size:14px;color:var(--text);font-family:inherit;resize:none;max-height:110px;line-height:1.5;min-height:22px}
@@ -140,17 +110,16 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 #sb{background:var(--gold);border:none;border-radius:9px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:all .15s;color:#000;font-size:15px;font-weight:700}
 #sb:hover{background:var(--gold-h);transform:scale(1.05)}
 #sb:disabled{opacity:.4;cursor:not-allowed;transform:none}
-.i-hint{font-size:10.5px;color:var(--dim);text-align:center;margin-top:5px}
- 
+.i-hint{font-size:10.5px;color:var(--dim)}
 /* PRICING */
 #screen-pricing.on{display:block;padding-top:60px}
 .p-hero{text-align:center;padding:4rem 1.5rem 2.5rem;background:radial-gradient(ellipse at 50% 0%,rgba(245,166,35,.08) 0%,transparent 65%)}
-.p-title{font-size:clamp(26px,5vw,46px);font-weight:800;color:var(--text);letter-spacing:-.02em;margin-bottom:.75rem}
+.p-title{font-size:clamp(26px,5vw,46px);font-weight:800;letter-spacing:-.02em;margin-bottom:.75rem}
 .p-sub{font-size:15px;color:var(--muted);max-width:460px;margin:0 auto 1.5rem;line-height:1.6}
 .p-tagline{display:inline-block;background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.3);color:var(--green);padding:6px 16px;border-radius:20px;font-size:12.5px;font-weight:600;margin-bottom:1.5rem}
-.t-badges{display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap}
+.t-badges{display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap;margin-bottom:1rem}
 .t-badge{font-size:12.5px;color:var(--dim);display:flex;align-items:center;gap:5px}
-.p-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1050px;margin:0 auto;padding:1rem 1.5rem 4rem;align-items:start}
+.p-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;max-width:1050px;margin:0 auto;padding:1rem 1.5rem 2rem;align-items:start}
 .pc{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;position:relative;transition:transform .2s,border-color .2s}
 .pc:hover{transform:translateY(-3px)}
 .pc.pro{border-color:var(--gold-b);background:rgba(245,166,35,.03);transform:translateY(-6px)}
@@ -160,28 +129,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .p-tier.s,.p-tier.p{color:var(--gold)}
 .p-tier.e{color:var(--muted)}
 .p-price{display:flex;align-items:baseline;gap:4px;margin-bottom:.25rem}
-.p-num{font-size:42px;font-weight:800;color:var(--text);letter-spacing:-.03em;line-height:1}
+.p-num{font-size:42px;font-weight:800;letter-spacing:-.03em;line-height:1}
 .p-per{font-size:14px;color:var(--muted)}
 .p-desc{font-size:12.5px;color:var(--muted);margin-bottom:1.25rem;line-height:1.5}
 .v-callout{background:rgba(245,166,35,.12);border:1px solid rgba(245,166,35,.25);border-radius:8px;padding:8px 12px;font-size:12px;color:var(--gold);margin-bottom:1.1rem;display:flex;align-items:center;gap:6px}
 .pf{list-style:none;margin-bottom:1.5rem;display:flex;flex-direction:column;gap:8px}
-.pf li{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--text);line-height:1.4}
+.pf li{display:flex;align-items:flex-start;gap:8px;font-size:13px;line-height:1.4}
 .chk{width:17px;height:17px;border-radius:50%;background:rgba(16,185,129,.15);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:9px;flex-shrink:0;margin-top:1px}
 .pcta{width:100%;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .2s;text-decoration:none;display:block;text-align:center;border:none;letter-spacing:.01em}
 .pcta.cs,.pcta.ce{background:transparent;border:1px solid var(--border);color:var(--text)}
 .pcta.cs:hover,.pcta.ce:hover{border-color:rgba(255,255,255,.25);background:rgba(255,255,255,.04)}
 .pcta.cp{background:var(--gold);color:#000;font-weight:700}
 .pcta.cp:hover{background:var(--gold-h)}
-.cta-note{font-size:11.5px;color:var(--dim);text-align:center;margin-top:6px}
- 
-/* FOUNDER SECTION */
 .founder-section{max-width:760px;margin:0 auto;padding:0 1.5rem 3rem}
 .founder-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:1.75rem;display:flex;gap:1.25rem;align-items:flex-start}
 .founder-avatar{width:54px;height:54px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:22px;color:#000;flex-shrink:0}
 .founder-name{font-size:15px;font-weight:700;margin-bottom:3px}
 .founder-role{font-size:12px;color:var(--gold);margin-bottom:.6rem}
 .founder-bio{font-size:13px;color:var(--muted);line-height:1.65}
- 
 /* ADMIN */
 #screen-admin.on{display:block;padding-top:60px}
 .admin-wrap{max-width:900px;margin:0 auto;padding:2rem 1.5rem 4rem}
@@ -189,7 +154,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .admin-sub{font-size:13px;color:var(--muted);margin-bottom:1.5rem}
 .admin-table{width:100%;border-collapse:collapse;font-size:13px}
 .admin-table th{text-align:left;padding:10px 14px;background:var(--bg-card2);border:1px solid var(--border);color:var(--muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.05em}
-.admin-table td{padding:10px 14px;border:1px solid var(--border);color:var(--text);vertical-align:top}
+.admin-table td{padding:10px 14px;border:1px solid var(--border);vertical-align:top}
 .admin-table tr:hover td{background:rgba(255,255,255,.02)}
 .admin-empty{text-align:center;padding:2rem;color:var(--dim);font-size:13px}
 .admin-stats{display:flex;gap:1rem;margin-bottom:1.5rem;flex-wrap:wrap}
@@ -197,26 +162,24 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .stat-val{font-size:28px;font-weight:800;color:var(--gold)}
 .stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
 .admin-logout{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;font-size:13px;color:var(--muted);cursor:pointer;font-family:inherit}
-.admin-logout:hover{color:var(--text);border-color:rgba(255,255,255,.2)}
+.admin-logout:hover{color:var(--text)}
 .admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
 .admin-login{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 60px);padding:2rem}
 .admin-login-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--rl);padding:2rem;max-width:340px;width:100%;text-align:center}
 .admin-login-card h2{font-size:20px;font-weight:700;margin-bottom:.5rem}
 .admin-login-card p{font-size:13px;color:var(--muted);margin-bottom:1.25rem}
-.admin-login-card input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;transition:border-color .2s;margin-bottom:10px}
+.admin-login-card input{width:100%;background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:9px;padding:11px 14px;font-size:14px;color:var(--text);font-family:inherit;outline:none;margin-bottom:10px}
 .admin-login-card input:focus{border-color:var(--gold-b)}
 .admin-login-card button{width:100%;padding:12px;background:var(--gold);border:none;border-radius:9px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;color:#000}
-.admin-login-card button:hover{background:var(--gold-h)}
 .admin-login-err{font-size:12px;color:var(--red);margin-bottom:8px;display:none}
- 
-/* UPGRADE MODAL */
+/* MODAL — used for upgrade, privacy, terms */
 .mo{position:fixed;inset:0;background:rgba(0,0,0,.87);display:flex;align-items:center;justify-content:center;z-index:500;padding:1rem;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(6px)}
 .mo.on{opacity:1;pointer-events:all}
-.mb2{background:var(--bg-card);border:1px solid var(--border-g);border-radius:var(--rl);padding:2rem;max-width:460px;width:100%;transform:translateY(16px);transition:transform .25s;max-height:calc(100vh - 2rem);overflow-y:auto}
+.mb2{background:var(--bg-card);border:1px solid var(--border-g);border-radius:var(--rl);padding:2rem;max-width:600px;width:100%;transform:translateY(16px);transition:transform .25s;max-height:85vh;overflow-y:auto}
 .mo.on .mb2{transform:translateY(0)}
 .m-title{font-size:21px;font-weight:700;margin-bottom:.5rem}
 .m-sub{font-size:13.5px;color:var(--muted);margin-bottom:1.4rem;line-height:1.6}
-.m-close{width:100%;background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;font-family:inherit;padding:8px;margin-top:8px;text-decoration:underline;text-decoration-color:var(--dim)}
+.m-close{width:100%;background:none;border:none;color:var(--dim);font-size:13px;cursor:pointer;font-family:inherit;padding:8px;margin-top:12px;text-decoration:underline}
 .m-close:hover{color:var(--muted)}
 .upgrade-plans{display:flex;flex-direction:column;gap:8px;margin-bottom:1rem}
 .up-row{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:10px;padding:11px 15px;cursor:pointer;transition:all .15s;text-decoration:none;color:var(--text)}
@@ -225,51 +188,39 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .up-name{font-size:14px;font-weight:600}
 .up-price{font-size:14px;font-weight:700;color:var(--gold)}
 .pop-badge{font-size:10px;background:var(--gold);color:#000;padding:2px 8px;border-radius:10px;font-weight:700;margin-left:6px}
- 
+/* LEGAL MODAL CONTENT */
+.legal-content h2{font-size:16px;font-weight:700;color:var(--gold);margin:1.5rem 0 .5rem;padding-bottom:.4rem;border-bottom:1px solid var(--border)}
+.legal-content h2:first-child{margin-top:0}
+.legal-content p{font-size:13px;color:var(--muted);margin-bottom:.75rem;line-height:1.65}
+.legal-content ul{padding-left:1.25rem;margin-bottom:.75rem}
+.legal-content ul li{font-size:13px;color:var(--muted);margin-bottom:.3rem;line-height:1.55}
+.legal-content a{color:var(--gold)}
+.legal-highlight{background:var(--bg-card2);border:1px solid var(--border);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem}
+.legal-highlight p{margin-bottom:0;color:var(--text);font-size:13px}
+.legal-warn{background:rgba(248,113,113,0.08);border:1px solid rgba(248,113,113,0.3);border-radius:10px;padding:1rem 1.25rem;margin-bottom:1rem}
+.legal-warn p{margin-bottom:0;color:#fca5a5;font-size:13px}
 /* FOOTER */
 .footer{background:var(--bg-card);border-top:1px solid var(--border);padding:1.25rem 1.5rem;text-align:center;font-size:12px;color:var(--dim)}
-.footer a{color:var(--gold);text-decoration:none}
+.footer a{color:var(--gold);text-decoration:none;cursor:pointer}
 .footer a:hover{text-decoration:underline}
- 
-/* EMAIL FLOAT */
-.wa-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;width:52px;height:52px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(245,166,35,.3);cursor:pointer;transition:transform .2s,box-shadow .2s;text-decoration:none}
+.wa-btn{position:fixed;bottom:1.5rem;right:1.5rem;z-index:300;width:52px;height:52px;background:#f5a623;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(245,166,35,.3);cursor:pointer;transition:transform .2s;text-decoration:none}
 .wa-btn:hover{transform:scale(1.08)}
 .wa-btn svg{width:28px;height:28px;fill:#fff}
 .wa-tooltip{position:absolute;right:60px;top:50%;transform:translateY(-50%);background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:6px 11px;font-size:12px;color:var(--text);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .2s}
 .wa-btn:hover .wa-tooltip{opacity:1}
- 
-/* TOAST */
 .toast{position:fixed;bottom:5.5rem;left:50%;transform:translateX(-50%) translateY(80px);background:var(--bg-card);border:1px solid rgba(248,113,113,.4);color:var(--red);padding:10px 20px;border-radius:10px;font-size:13px;z-index:999;transition:transform .3s ease;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.4)}
 .toast.good{border-color:rgba(16,185,129,.4);color:var(--green)}
 .toast.show{transform:translateX(-50%) translateY(0)}
- 
 @keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes tb{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-8px)}}
- 
-@media(max-width:700px){
-  .p-cards{grid-template-columns:1fr}
-  .pc.pro{transform:none}
-  .t-badges{gap:.875rem}
-  .suggs{grid-template-columns:1fr}
-  .ai-pill{display:none}
-  .n-name{font-size:15px}
-  .gate-card{padding:1.75rem 1.25rem}
-  .mb2{padding:1.5rem}
-  .admin-stats{flex-direction:column}
-  .demo-btn{display:none}
-  .founder-card{flex-direction:column}
-}
-@media(max-width:480px){.suggs{grid-template-columns:1fr}.mu,.ma{max-width:92%}}
+@media(max-width:700px){.p-cards{grid-template-columns:1fr}.pc.pro{transform:none}.suggs{grid-template-columns:1fr}.ai-pill{display:none}.n-name{font-size:15px}.gate-card{padding:1.75rem 1.25rem}.mb2{padding:1.5rem}.admin-stats{flex-direction:column}.demo-btn{display:none}.founder-card{flex-direction:column}}
+@media(max-width:480px){.mu,.ma{max-width:92%}}
 </style>
 </head>
 <body>
  
-<!-- NAV -->
 <nav id="main-nav" style="display:none">
-  <a class="n-logo" onclick="goScreen('chat')">
-    <div class="n-box">W</div>
-    <span class="n-name">WealthPilot</span>
-  </a>
+  <a class="n-logo" onclick="goScreen('chat')"><div class="n-box">W</div><span class="n-name">WealthPilot</span></a>
   <div class="n-right">
     <div class="ai-pill">&#9889; AI POWERED</div>
     <button class="n-btn on" id="nb-chat" onclick="goScreen('chat')">Ask Anything</button>
@@ -277,8 +228,8 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
   </div>
 </nav>
  
-<!-- EMAIL GATE -->
-<div class="screen on" id="screen-gate" style="background:var(--bg)">
+<!-- GATE -->
+<div class="screen on" id="screen-gate">
   <div class="gate-wrap">
     <div class="gate-card">
       <div class="gate-icon">W</div>
@@ -295,46 +246,36 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
         <input type="email" id="g-email" placeholder="Work email address" autocomplete="email" required>
         <label class="gate-check">
           <input type="checkbox" id="g-consent" required>
-          <span>I agree to receive updates and important notices from WealthPilot</span>
+          <span>I agree to receive updates from WealthPilot and accept the <a onclick="showTerms()">Terms of Service</a></span>
         </label>
         <div class="gate-err" id="gate-err"></div>
         <button type="button" class="gate-submit" onclick="submitGate(event)">Get Free Access &rarr;</button>
       </form>
-      <p class="gate-privacy">&#128274; No client data collected. No data sold. <a href="/privacy.html" style="color:var(--gold)">Privacy Policy</a></p>
+      <p class="gate-privacy">&#128274; No client data collected. No data sold. <a onclick="showPrivacy()">Privacy Policy</a> &middot; <a onclick="showTerms()">Terms</a></p>
     </div>
   </div>
-  <footer class="footer">
-    &copy; 2026 WealthPilot &mdash; Founded 2026 &mdash;
-    <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash;
-    <a href="/privacy.html">Privacy Policy</a> &middot;
-    <a href="/terms.html">Terms of Service</a> &middot;
-    Built for fee-only financial advisors
-  </footer>
+  <footer class="footer">&copy; 2026 WealthPilot &mdash; <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash; <a onclick="showPrivacy()">Privacy Policy</a> &middot; <a onclick="showTerms()">Terms of Service</a> &mdash; Built for fee-only financial advisors</footer>
 </div>
  
 <!-- CHAT -->
 <div class="screen" id="screen-chat">
   <div class="chat-inner">
     <div class="disc-inline" id="disc-banner">
-      &#9888;&#65039; <strong>Research tool only — not financial advice.</strong> All outputs reference IRS, SSA, or Medicare sources. Verify before client use. &nbsp;|&nbsp; <a href="/terms.html" style="color:#ffe08a">Terms</a>
-      <button class="disc-dismiss" onclick="dismissDisc()" title="Dismiss">&#10005;</button>
+      &#9888;&#65039; <strong>Research tool only — not financial advice.</strong> All outputs reference IRS, SSA, or Medicare sources. Verify before client use. &nbsp;|&nbsp; <a onclick="showTerms()" style="color:#ffe08a;cursor:pointer">Terms</a>
+      <button class="disc-dismiss" onclick="dismissDisc()">&#10005;</button>
     </div>
     <div class="u-bar" id="ubar" style="display:none">
-      <div class="u-left">
-        <span>Queries remaining:</span>
-        <span class="u-num" id="unum">5</span>
-        <span id="u-period">today</span>
-      </div>
+      <div class="u-left"><span>Queries remaining:</span><span class="u-num" id="unum">5</span><span id="u-period">remaining (free)</span></div>
       <div class="u-track"><div class="u-fill" id="ufill" style="width:100%"></div></div>
       <span class="u-up" onclick="openUpgradeModal()">Upgrade &rarr;</span>
     </div>
-    <div class="rate-bar" id="rate-bar">&#128683; Rate limit: please wait <span id="rate-countdown">60</span>s before sending another query.</div>
+    <div class="rate-bar" id="rate-bar">&#128683; Too many requests — wait <span id="rate-countdown">60</span>s</div>
     <div class="msgs" id="msgs">
       <div class="w-state" id="ws">
         <div class="w-ring">&#128188;</div>
         <div class="w-title">WealthPilot AI Research Assistant</div>
         <div class="w-tagline">Built for NAPFA-listed fee-only advisors</div>
-        <p class="w-sub">Ask me anything about Roth conversions, IRMAA planning, Social Security timing, RMDs, tax-loss harvesting, or retirement withdrawal strategy. All answers cite IRS and SSA sources.</p>
+        <p class="w-sub">Ask me anything about Roth conversions, IRMAA planning, Social Security timing, RMDs, or retirement withdrawal strategy. All answers cite IRS and SSA sources.</p>
         <div class="suggs">
           <button class="s-btn" onclick="qs('What are the 2024 IRMAA thresholds and how does a Roth conversion affect them?')">&#127970; IRMAA thresholds and Roth conversions</button>
           <button class="s-btn" onclick="qs('Explain the optimal Social Security claiming strategy for a married couple at full retirement age')">&#128202; Social Security claiming strategy</button>
@@ -353,25 +294,19 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        <div class="i-hint">Research only &middot; Verify all outputs &middot; <a href="/terms.html" style="color:var(--dim)">Terms</a></div>
+        <div class="i-hint">Research only &middot; Verify all outputs &middot; <a onclick="showTerms()" style="color:var(--dim);cursor:pointer;font-size:10.5px">Terms</a></div>
         <div class="char-counter" id="char-counter">0 / 500</div>
       </div>
     </div>
   </div>
-  <footer class="footer">
-    &#128274; No client data stored &mdash;
-    <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash;
-    <a href="/privacy.html">Privacy Policy</a> &middot;
-    <a href="/terms.html">Terms of Service</a> &mdash;
-    &copy; 2026 WealthPilot
-  </footer>
+  <footer class="footer">&copy; 2026 WealthPilot &mdash; <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash; <a onclick="showPrivacy()">Privacy Policy</a> &middot; <a onclick="showTerms()">Terms of Service</a></footer>
 </div>
  
 <!-- PRICING -->
 <div class="screen" id="screen-pricing">
   <div class="p-hero">
     <h1 class="p-title">Simple, Transparent Pricing</h1>
-    <p class="p-sub">No hidden fees. No long-term contracts. Research-grade AI for the CFPs who need it most.</p>
+    <p class="p-sub">No hidden fees. No long-term contracts. Research-grade AI for fee-only CFPs.</p>
     <div class="p-tagline">&#10003; Early access open — NAPFA-listed advisors only</div>
     <div class="t-badges">
       <span class="t-badge">&#128274; No client data stored</span>
@@ -398,7 +333,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
       <div class="p-tier p">PROFESSIONAL</div>
       <div class="p-price"><span class="p-num">$299</span><span class="p-per">/mo</span></div>
       <p class="p-desc">For advisors with active retirement and tax planning practices</p>
-      <div class="v-callout">&#9200; Built specifically for retirement &amp; tax planning research</div>
+      <div class="v-callout">&#9200; Built for retirement &amp; tax planning research</div>
       <ul class="pf">
         <li><span class="chk">&#10003;</span>100 research queries/month</li>
         <li><span class="chk">&#10003;</span>Everything in Starter</li>
@@ -412,37 +347,28 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
     <div class="pc">
       <div class="p-tier e">ENTERPRISE</div>
       <div class="p-price"><span class="p-num">$599</span><span class="p-per">/mo</span></div>
-      <p class="p-desc">For growing RIA practices needing white-label branding and team access</p>
+      <p class="p-desc">For growing RIA practices needing white-label branding</p>
       <ul class="pf">
         <li><span class="chk">&#10003;</span>Unlimited queries</li>
         <li><span class="chk">&#10003;</span>Everything in Professional</li>
-        <li><span class="chk">&#10003;</span>White-label branding (your logo + colors)</li>
+        <li><span class="chk">&#10003;</span>White-label branding</li>
         <li><span class="chk">&#10003;</span>Custom system prompt for your firm</li>
         <li><span class="chk">&#10003;</span>Manual onboarding by founder</li>
       </ul>
-      <a class="pcta ce" href="mailto:support@wealthpilot.co?subject=WealthPilot Enterprise" target="_blank">Contact Us</a>
+      <a class="pcta ce" href="mailto:support@wealthpilot.co?subject=WealthPilot Enterprise">Contact Us</a>
     </div>
   </div>
- 
-  <!-- FOUNDER SECTION -->
   <div class="founder-section">
     <div class="founder-card">
       <div class="founder-avatar">B</div>
       <div>
         <div class="founder-name">Babar — Founder, WealthPilot</div>
         <div class="founder-role">Solo founder &middot; B.Sc. (Hons) Statistics &middot; Built for NAPFA advisors</div>
-        <div class="founder-bio">WealthPilot is an independent, self-funded research tool. No venture capital. No data selling. No ads. Built specifically for fee-only CFPs who need defensible, IRS-cited AI research — not a generic chatbot. If you have questions, you're talking directly to the person who built it: <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a></div>
+        <div class="founder-bio">WealthPilot is independent and self-funded. No venture capital. No data selling. No ads. Built specifically for fee-only CFPs who need defensible, IRS-cited AI research. Questions? You're talking directly to the person who built it: <a href="mailto:support@wealthpilot.co" style="color:var(--gold)">support@wealthpilot.co</a></div>
       </div>
     </div>
   </div>
- 
-  <footer class="footer">
-    &#128274; No client data stored &mdash;
-    <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash;
-    <a href="/privacy.html">Privacy Policy</a> &middot;
-    <a href="/terms.html">Terms of Service</a> &mdash;
-    &copy; 2026 WealthPilot
-  </footer>
+  <footer class="footer">&copy; 2026 WealthPilot &mdash; <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> &mdash; <a onclick="showPrivacy()">Privacy Policy</a> &middot; <a onclick="showTerms()">Terms of Service</a></footer>
 </div>
  
 <!-- ADMIN -->
@@ -459,345 +385,172 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
   <div id="admin-dash" style="display:none">
     <div class="admin-wrap">
       <div class="admin-header">
-        <div>
-          <div class="admin-title">&#128200; Leads Dashboard</div>
-          <div class="admin-sub">All email gate submissions</div>
-        </div>
+        <div><div class="admin-title">&#128200; Leads Dashboard</div><div class="admin-sub">All email gate submissions</div></div>
         <button class="admin-logout" onclick="adminLogout()">Log out</button>
       </div>
       <div class="admin-stats" id="admin-stats"></div>
-      <table class="admin-table" id="admin-table">
-        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Consent</th><th>Date &amp; Time</th><th>Status</th></tr></thead>
-        <tbody id="admin-tbody"></tbody>
-      </table>
+      <table class="admin-table"><thead><tr><th>#</th><th>Name</th><th>Email</th><th>Consent</th><th>Date &amp; Time</th><th>Status</th></tr></thead><tbody id="admin-tbody"></tbody></table>
     </div>
   </div>
 </div>
  
-<!-- UPGRADE MODAL -->
+<!-- SINGLE MODAL — handles upgrade, privacy, terms -->
 <div class="mo" id="mo"><div class="mb2" id="mb2"></div></div>
  
-<!-- EMAIL FLOAT -->
 <a class="wa-btn" href="mailto:support@wealthpilot.co" target="_blank" rel="noopener" id="wa-float" style="display:none">
   <div class="wa-tooltip">Email founder</div>
-  <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+  <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
 </a>
- 
 <div class="toast" id="toast"></div>
  
 <script>
-// ─────────────────────────────────────────
-// AGENT 4: AI PROVIDER ABSTRACTION
-// API key MUST live in Cloudflare Worker env vars only — never here
-// To switch providers: change AI_CONFIG.provider and endpoint
-// ─────────────────────────────────────────
-const AI_CONFIG = {
-  provider: 'anthropic', // switch to 'openai' etc by changing endpoint + payload shape below
-  endpoint: 'https://empty-block-1f07.babar-wealthpilot.workers.dev',
-  model: 'claude-sonnet-4-5',
-  maxTokens: 1024
-};
- 
-async function getAIResponse(messages, systemPrompt) {
-  // AGENT 4: provider abstraction — all AI calls go through here only
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000); // 30s timeout
-  try {
-    const res = await fetch(AI_CONFIG.endpoint, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: AI_CONFIG.model,
-        max_tokens: AI_CONFIG.maxTokens,
-        system: systemPrompt,
-        messages: messages
-      })
-    });
-    clearTimeout(timeout);
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error('API_ERROR:' + (errData.error?.message || res.status));
-    }
-    const data = await res.json();
-    if (!data.content || !data.content[0] || !data.content[0].text) {
-      throw new Error('EMPTY_RESPONSE');
-    }
-    return data.content[0].text;
-  } catch(e) {
-    clearTimeout(timeout);
-    throw e;
-  }
-}
- 
-// ─────────────────────────────────────────
-// AGENT 3: PLAN & BILLING SYSTEM
-// ─────────────────────────────────────────
- 
-// STRIPE WEBHOOK HANDLER — implement server-side in Cloudflare Worker:
-// POST /webhook/stripe
-// Verify: stripe.webhooks.constructEvent(body, sig, STRIPE_WEBHOOK_SECRET)
-// On event 'checkout.session.completed':
-//   const { email, plan, paid_at, expires_at } = session.metadata
-//   Store in Supabase: { email, plan, paid_at, expires_at }
-//   Set response header to user's browser via redirect URL param: ?plan=professional&token=...
- 
-const PLAN_CONFIG = {
-  free:         { limit: 5,   period: 'total',  label: 'Free Trial' },
-  starter:      { limit: 30,  period: 'month',  label: 'Starter' },
-  professional: { limit: 100, period: 'month',  label: 'Professional' },
-  enterprise:   { limit: 9999,period: 'month',  label: 'Enterprise' }
-};
- 
-function getUserPlan() {
-  // AGENT 3: never throws — always returns a valid string
-  try {
-    // 1. Check URL param (set after Stripe/Wise payment redirect)
-    const urlParam = new URLSearchParams(window.location.search).get('plan');
-    if (urlParam && PLAN_CONFIG[urlParam]) {
-      localStorage.setItem('wp_plan', urlParam);
-      return urlParam;
-    }
-    // 2. Check localStorage
-    const stored = localStorage.getItem('wp_plan');
-    if (stored && PLAN_CONFIG[stored]) return stored;
-    // 3. Default
-    return 'free';
-  } catch(e) {
-    return 'free';
-  }
-}
- 
-function getPlanLimit() {
-  return PLAN_CONFIG[getUserPlan()].limit;
-}
- 
-function getPlanPeriod() {
-  return PLAN_CONFIG[getUserPlan()].period;
-}
- 
-// Usage keys — monthly for paid plans, lifetime for free
-const usageKey = () => {
-  if (getPlanPeriod() === 'total') return 'wp_u_lifetime';
-  return 'wp_u_' + new Date().getFullYear() + '_' + new Date().getMonth();
-};
-const getUsed = () => parseInt(localStorage.getItem(usageKey()) || '0', 10);
-const addUsed = () => localStorage.setItem(usageKey(), getUsed() + 1);
-const getRemaining = () => Math.max(0, getPlanLimit() - getUsed());
- 
-// ─────────────────────────────────────────
-// AGENT 4: RATE LIMITING (10 req/min per session)
-// ─────────────────────────────────────────
-const rateLimiter = {
-  requests: [],
-  maxPerMin: 10,
-  cooldownTimer: null,
- 
-  canSend() {
-    const now = Date.now();
-    this.requests = this.requests.filter(t => now - t < 60000);
-    return this.requests.length < this.maxPerMin;
-  },
- 
-  record() {
-    this.requests.push(Date.now());
-  },
- 
-  secondsUntilReset() {
-    if (!this.requests.length) return 0;
-    const oldest = Math.min(...this.requests);
-    return Math.ceil((60000 - (Date.now() - oldest)) / 1000);
-  },
- 
-  showCooldown() {
-    const bar = document.getElementById('rate-bar');
-    bar.style.display = 'block';
-    let secs = this.secondsUntilReset();
-    document.getElementById('rate-countdown').textContent = secs;
-    clearInterval(this.cooldownTimer);
-    this.cooldownTimer = setInterval(() => {
-      secs--;
-      if (secs <= 0) {
-        bar.style.display = 'none';
-        clearInterval(this.cooldownTimer);
-      } else {
-        document.getElementById('rate-countdown').textContent = secs;
-      }
-    }, 1000);
-  }
-};
- 
-// ─────────────────────────────────────────
-// AGENT 4: INPUT SANITISATION
-// ─────────────────────────────────────────
-const MAX_QUERY_LENGTH = 500;
- 
-function sanitizeInput(text) {
-  // Strip HTML tags
-  const div = document.createElement('div');
-  div.appendChild(document.createTextNode(text));
-  let clean = div.innerHTML;
-  // Trim and enforce max length
-  return clean.trim().substring(0, MAX_QUERY_LENGTH);
-}
- 
-function updateCharCount(el) {
-  const len = el.value.length;
-  const counter = document.getElementById('char-counter');
-  counter.textContent = len + ' / ' + MAX_QUERY_LENGTH;
-  counter.className = 'char-counter' + (len > 450 ? (len >= 500 ? ' over' : ' warn') : '');
-  if (len > MAX_QUERY_LENGTH) el.value = el.value.substring(0, MAX_QUERY_LENGTH);
-}
- 
-// ─────────────────────────────────────────
-// CONFIG
-// ─────────────────────────────────────────
+// ── CONFIG ──
+const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5', maxTokens:1024 };
 const ACCESS_DAYS = 14;
 const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
- 
-const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
- 
-Expertise: Roth conversions, IRMAA planning, Social Security timing, RMD rules (including SECURE 2.0 changes), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, estate planning, 401k/IRA/HSA rules, capital gains optimization.
- 
-CRITICAL RULES:
-1. Always cite your source at the end of your answer. Format: "Source: [IRS Publication XXX] [IRC §XXX] [SSA.gov]" — use the most specific applicable reference.
-2. If you are not certain of a specific code section, cite "IRS.gov" generally and note the advisor should verify.
-3. Always end with: "Please verify this information against current IRS guidance before use with clients."
-4. Be specific: use exact dollar thresholds, percentages, and effective dates.
-5. Note when rules are scheduled to change (e.g. TCJA sunset provisions).
- 
-Style: Professional, precise, structured. Use headers and bullets for complex answers. Never speculate — if you don't know, say so and direct to IRS.gov or SSA.gov.`;
- 
-// ─────────────────────────────────────────
-// STORAGE
-// ─────────────────────────────────────────
-const LS = {
-  get: k => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
-  set: (k, v) => localStorage.setItem(k, JSON.stringify(v)),
-  del: k => localStorage.removeItem(k)
+const MAX_QUERY = 500;
+const PLAN_CONFIG = {
+  free:         { limit:5,    period:'total', label:'Free Trial' },
+  starter:      { limit:30,   period:'month', label:'Starter' },
+  professional: { limit:100,  period:'month', label:'Professional' },
+  enterprise:   { limit:9999, period:'month', label:'Enterprise' }
 };
+const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
+Expertise: Roth conversions, IRMAA planning, Social Security timing, RMD rules (SECURE 2.0), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, estate planning, 401k/IRA/HSA rules, capital gains optimization.
+RULES:
+1. Always cite your source at the end: "Source: [IRS Publication XXX] [IRC §XXX]" — use the most specific reference.
+2. If uncertain of a specific code section, cite "IRS.gov" and note the advisor should verify.
+3. Always end with: "Please verify this information against current IRS guidance before use with clients."
+4. Use exact dollar thresholds, percentages, and effective dates.
+5. Note when rules are scheduled to change (e.g. TCJA sunset provisions).
+Style: Professional, precise, structured. Headers and bullets for complex answers.`;
  
-// ─────────────────────────────────────────
-// USER / ACCESS
-// ─────────────────────────────────────────
-function getUser() { return LS.get('wp_user'); }
-function saveUser(u) { LS.set('wp_user', u); }
-function isAccessValid() {
-  const u = getUser();
-  if (!u) return false;
-  return (Date.now() - u.ts) < ACCESS_DAYS * 86400000;
-}
+// ── STORAGE ──
+const LS = { get:k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)), del:k=>localStorage.removeItem(k) };
  
-// ─────────────────────────────────────────
-// EMAIL GATE
-// ─────────────────────────────────────────
-function submitGate(e) {
+// ── PLAN ──
+function getUserPlan(){try{const u=new URLSearchParams(window.location.search).get('plan');if(u&&PLAN_CONFIG[u]){localStorage.setItem('wp_plan',u);return u;}const s=localStorage.getItem('wp_plan');if(s&&PLAN_CONFIG[s])return s;return'free';}catch{return'free';}}
+const usageKey=()=>PLAN_CONFIG[getUserPlan()].period==='total'?'wp_u_lifetime':'wp_u_'+new Date().getFullYear()+'_'+new Date().getMonth();
+const getUsed=()=>parseInt(localStorage.getItem(usageKey())||'0',10);
+const addUsed=()=>localStorage.setItem(usageKey(),getUsed()+1);
+const getRemaining=()=>Math.max(0,PLAN_CONFIG[getUserPlan()].limit-getUsed());
+ 
+// ── RATE LIMITER ──
+const RL={reqs:[],max:10,timer:null,canSend(){const n=Date.now();this.reqs=this.reqs.filter(t=>n-t<60000);return this.reqs.length<this.max;},record(){this.reqs.push(Date.now());},secs(){return this.reqs.length?Math.ceil((60000-(Date.now()-Math.min(...this.reqs)))/1000):0;},showCooldown(){const b=document.getElementById('rate-bar');b.style.display='block';let s=this.secs();document.getElementById('rate-countdown').textContent=s;clearInterval(this.timer);this.timer=setInterval(()=>{s--;if(s<=0){b.style.display='none';clearInterval(this.timer);}else document.getElementById('rate-countdown').textContent=s;},1000);}};
+ 
+// ── INPUT ──
+function sanitize(t){const d=document.createElement('div');d.appendChild(document.createTextNode(t));return d.innerHTML.trim().substring(0,MAX_QUERY);}
+function updateCharCount(el){const l=el.value.length;const c=document.getElementById('char-counter');c.textContent=l+' / '+MAX_QUERY;c.className='char-counter'+(l>450?(l>=500?' over':' warn'):'');if(l>MAX_QUERY)el.value=el.value.substring(0,MAX_QUERY);}
+ 
+// ── USER ──
+function getUser(){return LS.get('wp_user');}
+function isAccessValid(){const u=getUser();if(!u)return false;return(Date.now()-u.ts)<ACCESS_DAYS*86400000;}
+ 
+// ── GATE ──
+function submitGate(e){
   e.preventDefault();
-  const name    = sanitizeInput(document.getElementById('g-name').value);
-  const email   = document.getElementById('g-email').value.trim().toLowerCase();
-  const consent = document.getElementById('g-consent').checked;
-  const err     = document.getElementById('gate-err');
- 
-  if (!name || !email || !consent) {
-    err.style.display = 'block';
-    err.textContent = 'Please fill in all fields and check the consent box.';
-    return;
-  }
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    err.style.display = 'block';
-    err.textContent = 'Please enter a valid email address.';
-    return;
-  }
-  err.style.display = 'none';
- 
-  const user = { name, email, consent, ts: Date.now() };
-  saveUser(user);
-  const leads = LS.get('wp_leads') || [];
-  leads.push({ ...user, id: Date.now() });
-  LS.set('wp_leads', leads);
- 
-  emailjs.send("service_eq5dkmg", "template_sbv9fgi", {
-    to_email: "support@wealthpilot.co",
-    from_name: name,
-    from_email: email,
-    consent: consent ? "Yes" : "No",
-    signup_time: new Date().toLocaleString(),
-    message: "New WealthPilot signup: " + name + " (" + email + ")"
-  }).catch(() => {});
- 
+  const name=sanitize(document.getElementById('g-name').value);
+  const email=document.getElementById('g-email').value.trim().toLowerCase();
+  const consent=document.getElementById('g-consent').checked;
+  const err=document.getElementById('gate-err');
+  if(!name||!email||!consent){err.style.display='block';err.textContent='Please fill in all fields and check the consent box.';return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){err.style.display='block';err.textContent='Please enter a valid email address.';return;}
+  err.style.display='none';
+  const user={name,email,consent,ts:Date.now()};
+  LS.set('wp_user',user);
+  const leads=LS.get('wp_leads')||[];leads.push({...user,id:Date.now()});LS.set('wp_leads',leads);
+  emailjs.send("service_eq5dkmg","template_sbv9fgi",{to_email:"babar.wealthpilot@gmail.com",from_name:name,from_email:email,consent:consent?"Yes":"No",signup_time:new Date().toLocaleString(),message:"New WealthPilot signup: "+name+" ("+email+")"}).catch(()=>{});
   enterApp();
 }
+function enterApp(){document.getElementById('screen-gate').classList.remove('on');document.getElementById('main-nav').style.display='flex';document.getElementById('wa-float').style.display='flex';goScreen('chat');}
  
-function enterApp() {
-  document.getElementById('screen-gate').classList.remove('on');
-  document.getElementById('main-nav').style.display = 'flex';
-  document.getElementById('wa-float').style.display = 'flex';
-  goScreen('chat');
+// ── DISCLAIMER ──
+function dismissDisc(){document.getElementById('disc-banner').style.display='none';sessionStorage.setItem('disc_dismissed','1');}
+function initDisc(){if(sessionStorage.getItem('disc_dismissed'))document.getElementById('disc-banner').style.display='none';}
+ 
+// ── USAGE BAR ──
+function showUsageBar(){const bar=document.getElementById('ubar');const r=getRemaining();const l=PLAN_CONFIG[getUserPlan()].limit;bar.style.display='flex';document.getElementById('unum').textContent=r;document.getElementById('u-period').textContent=PLAN_CONFIG[getUserPlan()].period==='total'?'remaining (free)':'remaining this month';document.getElementById('ufill').style.width=Math.round((r/l)*100)+'%';}
+ 
+// ── NAV ──
+function goScreen(s){['chat','pricing','admin'].forEach(id=>{document.getElementById('screen-'+id).classList.toggle('on',id===s);});['chat','pricing'].forEach(id=>{const b=document.getElementById('nb-'+id);if(b)b.classList.toggle('on',id===s);});if(s!=='chat')window.scrollTo(0,0);if(s==='chat'){showUsageBar();initDisc();}}
+function checkRoute(){if(window.location.pathname.endsWith('/admin')||window.location.hash==='#admin'){document.getElementById('screen-gate').classList.remove('on');document.getElementById('main-nav').style.display='flex';document.getElementById('wa-float').style.display='flex';goScreen('admin');return true;}return false;}
+ 
+// ── LEGAL MODALS ──
+function showPrivacy(){
+  document.getElementById('mb2').innerHTML=`
+    <div class="m-title">&#128274; Privacy Policy</div>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Effective: June 15, 2026</p>
+    <div class="legal-content">
+      <div class="legal-highlight"><p>&#128274; <strong>Short version:</strong> WealthPilot collects only your name and email. We never store client financial data. We never sell your information.</p></div>
+      <h2>1. What we collect</h2>
+      <p>Name and email address (signup only), consent confirmation, usage counters (browser only, never transmitted), session conversation history (browser memory only, cleared on page close).</p>
+      <p><strong>We do not collect</strong> client names, SSNs, account numbers, or any third-party personal data.</p>
+      <h2>2. How we use it</h2>
+      <ul><li>To grant and manage your access</li><li>To send product updates (if you consented)</li><li>To respond to support requests</li></ul>
+      <h2>3. AI Processing — Anthropic Claude</h2>
+      <p>Queries are sent to Anthropic's API for processing under their Privacy Policy. <strong>Do not include client names, SSNs, or account numbers in queries.</strong> Use anonymised scenarios only.</p>
+      <h2>4. Data storage</h2>
+      <p>Conversation history: browser memory only. Name/email: browser localStorage and EmailJS only. No server-side conversation database. Request deletion: <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a></p>
+      <h2>5. Your rights (GDPR & CCPA)</h2>
+      <ul><li>Access, correction, deletion, portability of your data</li><li>Opt out of marketing at any time</li><li>We have not sold personal data to any third party</li></ul>
+      <p>Contact: <a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> — response within 30 days.</p>
+      <h2>6. Security</h2>
+      <p>HTTPS encryption on all data in transit. API keys stored in Cloudflare Worker environment variables only — never in client-side code. Input sanitisation and rate limiting applied.</p>
+      <h2>7. Changes</h2>
+      <p>We will update the effective date when this policy changes. Continued use constitutes acceptance.</p>
+    </div>
+    <button class="m-close" onclick="cm()">Close</button>`;
+  document.getElementById('mo').classList.add('on');
 }
  
-// ─────────────────────────────────────────
-// DISCLAIMER DISMISS (session only)
-// ─────────────────────────────────────────
-function dismissDisc() {
-  document.getElementById('disc-banner').style.display = 'none';
-  sessionStorage.setItem('disc_dismissed', '1');
+function showTerms(){
+  document.getElementById('mb2').innerHTML=`
+    <div class="m-title">&#128203; Terms of Service</div>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Effective: June 15, 2026</p>
+    <div class="legal-content">
+      <div class="legal-warn"><p>&#9888;&#65039; <strong>Important:</strong> WealthPilot provides AI-assisted research for informational purposes only. Not registered investment, tax, or legal advice. You are solely responsible for verifying all outputs before client use.</p></div>
+      <h2>1. Acceptance</h2>
+      <p>By using WealthPilot you agree to these Terms. If you do not agree, do not use the Service.</p>
+      <h2>2. Not financial or tax advice</h2>
+      <ul>
+        <li>All AI-generated content is for research and educational purposes only.</li>
+        <li>WealthPilot is not registered with the SEC, FINRA, IRS, or any regulatory body.</li>
+        <li>All outputs must be independently verified before use with clients.</li>
+        <li>Tax laws change frequently — WealthPilot may not reflect the most current rules.</li>
+        <li>You remain solely responsible for all advice given to your clients.</li>
+      </ul>
+      <h2>3. Subscription & payment</h2>
+      <ul>
+        <li>Free trial: 14 days, limited queries</li>
+        <li>Starter $199/mo · Professional $299/mo · Enterprise $599/mo</li>
+        <li>Cancel anytime by emailing support@wealthpilot.co</li>
+        <li>14-day money-back guarantee on first paid month</li>
+        <li>30 days notice before any price increase</li>
+      </ul>
+      <h2>4. Acceptable use</h2>
+      <ul>
+        <li>Do not enter client names, SSNs, or account numbers in queries</li>
+        <li>Do not share account access outside your firm</li>
+        <li>Do not attempt to reverse-engineer or scrape WealthPilot</li>
+        <li>Do not misrepresent AI outputs as independently verified professional advice</li>
+      </ul>
+      <h2>5. Disclaimers & liability</h2>
+      <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WEALTHPILOT SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID IN THE PRIOR 12 MONTHS.</p>
+      <h2>6. Governing law</h2>
+      <p>These Terms are governed by the laws of the State of Delaware, United States. Disputes shall be resolved by binding arbitration under AAA rules.</p>
+      <h2>7. Contact</h2>
+      <p><a href="mailto:support@wealthpilot.co">support@wealthpilot.co</a> — response within 2 business days.</p>
+    </div>
+    <button class="m-close" onclick="cm()">Close</button>`;
+  document.getElementById('mo').classList.add('on');
 }
  
-function initDisc() {
-  if (sessionStorage.getItem('disc_dismissed')) {
-    document.getElementById('disc-banner').style.display = 'none';
-  }
-}
- 
-// ─────────────────────────────────────────
-// USAGE BAR
-// ─────────────────────────────────────────
-function showUsageBar() {
-  const bar = document.getElementById('ubar');
-  const plan = getUserPlan();
-  const limit = getPlanLimit();
-  const r = getRemaining();
-  bar.style.display = 'flex';
-  document.getElementById('unum').textContent = r;
-  document.getElementById('u-period').textContent = getPlanPeriod() === 'total' ? 'remaining (free)' : 'remaining this month';
-  document.getElementById('ufill').style.width = Math.round((r / limit) * 100) + '%';
-}
- 
-// ─────────────────────────────────────────
-// NAVIGATION
-// ─────────────────────────────────────────
-function goScreen(s) {
-  ['chat','pricing','admin'].forEach(id => {
-    document.getElementById('screen-' + id).classList.toggle('on', id === s);
-  });
-  ['chat','pricing'].forEach(id => {
-    const btn = document.getElementById('nb-' + id);
-    if (btn) btn.classList.toggle('on', id === s);
-  });
-  if (s !== 'chat') window.scrollTo(0, 0);
-  if (s === 'chat') { showUsageBar(); initDisc(); }
-}
- 
-function checkRoute() {
-  if (window.location.pathname.endsWith('/admin') || window.location.hash === '#admin') {
-    document.getElementById('screen-gate').classList.remove('on');
-    document.getElementById('main-nav').style.display = 'flex';
-    document.getElementById('wa-float').style.display = 'flex';
-    goScreen('admin');
-    return true;
-  }
-  return false;
-}
- 
-// ─────────────────────────────────────────
-// UPGRADE MODAL
-// ─────────────────────────────────────────
-function openUpgradeModal() {
-  const plan = getUserPlan();
-  const planLabel = PLAN_CONFIG[plan].label;
-  document.getElementById('mb2').innerHTML = `
+// ── UPGRADE MODAL ──
+function openUpgradeModal(){
+  const plan=getUserPlan();
+  document.getElementById('mb2').innerHTML=`
     <div class="m-title">&#128640; Upgrade WealthPilot</div>
-    <p class="m-sub">You've reached your ${planLabel} plan limit. Upgrade to continue your research — we'll respond within a few hours.</p>
+    <p class="m-sub">You've reached your ${PLAN_CONFIG[plan].label} limit. Upgrade to continue your research.</p>
     <div class="upgrade-plans">
       <a class="up-row" href="https://wise.com/pay/r/1o6PoRc62rCf0t8" target="_blank" onclick="cm()">
         <div><div class="up-name">Starter</div><div style="font-size:12px;color:var(--muted)">30 queries/month</div></div>
@@ -816,206 +569,79 @@ function openUpgradeModal() {
     <button class="m-close" onclick="cm()">Close</button>`;
   document.getElementById('mo').classList.add('on');
 }
+const cm=()=>document.getElementById('mo').classList.remove('on');
+document.getElementById('mo').addEventListener('click',e=>{if(e.target===document.getElementById('mo'))cm();});
  
-const cm = () => document.getElementById('mo').classList.remove('on');
-document.getElementById('mo').addEventListener('click', e => { if (e.target === document.getElementById('mo')) cm(); });
+// ── ADMIN ──
+let adminAuthed=false;
+function adminLogin(){const pw=document.getElementById('admin-pw').value;if(pw===ADMIN_PASS){adminAuthed=true;document.getElementById('admin-login').style.display='none';document.getElementById('admin-dash').style.display='block';renderAdminDash();}else{document.getElementById('admin-login-err').style.display='block';document.getElementById('admin-pw').value='';document.getElementById('admin-pw').focus();}}
+function adminLogout(){adminAuthed=false;document.getElementById('admin-login').style.display='flex';document.getElementById('admin-dash').style.display='none';document.getElementById('admin-pw').value='';document.getElementById('admin-login-err').style.display='none';}
+function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now();const active=leads.filter(l=>(now-l.ts)<ACCESS_DAYS*86400000).length;document.getElementById('admin-stats').innerHTML=`<div class="stat-box"><div class="stat-val">${leads.length}</div><div class="stat-lbl">Total signups</div></div><div class="stat-box"><div class="stat-val">${active}</div><div class="stat-lbl">Active (in trial)</div></div><div class="stat-box"><div class="stat-val">${leads.filter(l=>l.consent).length}</div><div class="stat-lbl">Consented</div></div>`;const tbody=document.getElementById('admin-tbody');if(!leads.length){tbody.innerHTML='<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>';return;}tbody.innerHTML=[...leads].reverse().map((l,i)=>{const d=new Date(l.ts);const exp=(Date.now()-l.ts)<ACCESS_DAYS*86400000;const dl=Math.max(0,ACCESS_DAYS-Math.floor((Date.now()-l.ts)/86400000));return`<tr><td style="color:var(--dim)">${leads.length-i}</td><td><strong>${esc(l.name)}</strong></td><td><a href="mailto:${esc(l.email)}" style="color:var(--gold)">${esc(l.email)}</a></td><td style="color:${l.consent?'var(--green)':'var(--red)'}">${l.consent?'&#10003; Yes':'&#10007; No'}</td><td style="color:var(--muted)">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td style="color:${exp?'var(--green)':'var(--red)'}">${exp?'Trial — '+dl+'d left':'Expired'}</td></tr>`;}).join('');}
  
-// ─────────────────────────────────────────
-// ADMIN
-// ─────────────────────────────────────────
-let adminAuthed = false;
- 
-function adminLogin() {
-  const pw = document.getElementById('admin-pw').value;
-  if (pw === ADMIN_PASS) {
-    adminAuthed = true;
-    document.getElementById('admin-login').style.display = 'none';
-    document.getElementById('admin-dash').style.display = 'block';
-    renderAdminDash();
-  } else {
-    document.getElementById('admin-login-err').style.display = 'block';
-    document.getElementById('admin-pw').value = '';
-    document.getElementById('admin-pw').focus();
-  }
+// ── AI ──
+async function getAIResponse(messages,sys){
+  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),30000);
+  try{
+    const res=await fetch(AI_CONFIG.endpoint,{method:'POST',headers:{'content-type':'application/json'},signal:ctrl.signal,body:JSON.stringify({model:AI_CONFIG.model,max_tokens:AI_CONFIG.maxTokens,system:sys,messages})});
+    clearTimeout(t);
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error('API_ERROR:'+(e.error?.message||res.status));}
+    const data=await res.json();
+    if(!data.content||!data.content[0]||!data.content[0].text)throw new Error('EMPTY_RESPONSE');
+    return data.content[0].text;
+  }catch(e){clearTimeout(t);throw e;}
 }
  
-function adminLogout() {
-  adminAuthed = false;
-  document.getElementById('admin-login').style.display = 'flex';
-  document.getElementById('admin-dash').style.display = 'none';
-  document.getElementById('admin-pw').value = '';
-  document.getElementById('admin-login-err').style.display = 'none';
+function extractCitation(text){const m=text.match(/Source:\s*([^\n]+)/i);if(m)return m[1].trim();if(/IRS|IRC|Publication|SSA|Medicare/i.test(text))return null;return'Verify with IRS.gov before client use';}
+ 
+function fmtAI(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h3>$1</h3>').replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,s=>'<ul>'+s+'</ul>').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');}
+function esc(t){const d=document.createElement('div');d.appendChild(document.createTextNode(String(t)));return d.innerHTML;}
+ 
+let hist=[];
+function addMsg(role,text){
+  const msgs=document.getElementById('msgs');const td=document.getElementById('tdots');const ws=document.getElementById('ws');
+  if(ws&&ws.style.display!=='none')ws.style.display='none';
+  const wrap=document.createElement('div');wrap.className='msg '+(role==='user'?'mu':'ma');
+  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  if(role==='ai'){const cite=extractCitation(text);const citeHTML=cite?`<div class="source-cite"><span>&#128204;</span> <strong>Source:</strong> ${esc(cite)}</div>`:'';wrap.innerHTML=`<div class="mb">${fmtAI(text)}${citeHTML}</div><div class="mt">${t} &middot; AI Research &middot; Verify before use</div>`;}
+  else{wrap.innerHTML=`<div class="mb">${esc(text)}</div><div class="mt">${t}</div>`;}
+  msgs.insertBefore(wrap,td);msgs.scrollTop=msgs.scrollHeight;
 }
+function setTyp(on){document.getElementById('tdots').classList.toggle('on',on);if(on)document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;}
  
-function renderAdminDash() {
-  const leads = LS.get('wp_leads') || [];
-  const now   = Date.now();
-  const active = leads.filter(l => (now - l.ts) < ACCESS_DAYS * 86400000).length;
-  document.getElementById('admin-stats').innerHTML = `
-    <div class="stat-box"><div class="stat-val">${leads.length}</div><div class="stat-lbl">Total signups</div></div>
-    <div class="stat-box"><div class="stat-val">${active}</div><div class="stat-lbl">Active (in trial)</div></div>
-    <div class="stat-box"><div class="stat-val">${leads.filter(l=>l.consent).length}</div><div class="stat-lbl">Consented</div></div>`;
-  const tbody = document.getElementById('admin-tbody');
-  if (!leads.length) { tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>'; return; }
-  tbody.innerHTML = [...leads].reverse().map((l, i) => {
-    const d = new Date(l.ts);
-    const exp = (Date.now() - l.ts) < ACCESS_DAYS * 86400000;
-    const daysLeft = Math.max(0, ACCESS_DAYS - Math.floor((Date.now() - l.ts) / 86400000));
-    return `<tr>
-      <td style="color:var(--dim)">${leads.length - i}</td>
-      <td><strong>${esc(l.name)}</strong></td>
-      <td><a href="mailto:${esc(l.email)}" style="color:var(--gold)">${esc(l.email)}</a></td>
-      <td style="color:${l.consent ? 'var(--green)' : 'var(--red)'}">${l.consent ? '&#10003; Yes' : '&#10007; No'}</td>
-      <td style="color:var(--muted)">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td>
-      <td style="color:${exp ? 'var(--green)' : 'var(--red)'}">${exp ? 'Trial — ' + daysLeft + 'd left' : 'Expired'}</td>
-    </tr>`;
-  }).join('');
-}
- 
-// ─────────────────────────────────────────
-// CHAT ENGINE
-// ─────────────────────────────────────────
-let hist = [];
- 
-// AGENT 2: extract source citation from AI response
-function extractCitation(text) {
-  const sourceMatch = text.match(/Source:\s*([^\n]+)/i);
-  if (sourceMatch) return sourceMatch[1].trim();
-  if (/IRS|IRC|Publication|Rev\. Rul|SSA|Medicare|CFR/i.test(text)) return null; // citation embedded in text
-  return 'Verify with IRS.gov before client use';
-}
- 
-function fmtAI(text) {
-  return text
-    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-    .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^## (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^# (.+)$/gm,'<h3>$1</h3>')
-    .replace(/^- (.+)$/gm,'<li>$1</li>')
-    .replace(/(<li>.*<\/li>\n?)+/g, s => '<ul>' + s + '</ul>')
-    .replace(/\n\n/g,'<br><br>')
-    .replace(/\n/g,'<br>');
-}
- 
-function esc(t) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(String(t)));
-  return d.innerHTML;
-}
- 
-function addMsg(role, text) {
-  const msgs = document.getElementById('msgs');
-  const td   = document.getElementById('tdots');
-  const ws   = document.getElementById('ws');
-  if (ws && ws.style.display !== 'none') ws.style.display = 'none';
- 
-  const wrap = document.createElement('div');
-  wrap.className = 'msg ' + (role === 'user' ? 'mu' : 'ma');
-  const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
- 
-  if (role === 'ai') {
-    // AGENT 2: add source citation block
-    const citation = extractCitation(text);
-    const citeHTML = citation
-      ? `<div class="source-cite"><span>&#128204;</span> <strong>Source:</strong> ${esc(citation)}</div>`
-      : '';
-    wrap.innerHTML = `<div class="mb">${fmtAI(text)}${citeHTML}</div><div class="mt">${t} &middot; AI Research &middot; <a href="/terms.html" style="color:var(--dim);font-size:10px">Verify before use</a></div>`;
-  } else {
-    wrap.innerHTML = `<div class="mb">${esc(text)}</div><div class="mt">${t}</div>`;
-  }
- 
-  msgs.insertBefore(wrap, td);
-  msgs.scrollTop = msgs.scrollHeight;
-}
- 
-function setTyp(on) {
-  const td = document.getElementById('tdots');
-  const m  = document.getElementById('msgs');
-  td.classList.toggle('on', on);
-  if (on) m.scrollTop = m.scrollHeight;
-}
- 
-async function send() {
-  const inp  = document.getElementById('mi');
-  const raw  = inp.value.trim();
-  if (!raw) return;
- 
-  // AGENT 3: plan limit check
-  if (getRemaining() <= 0) { openUpgradeModal(); return; }
- 
-  // AGENT 4: rate limit check
-  if (!rateLimiter.canSend()) {
-    rateLimiter.showCooldown();
-    showToast('Too many requests — please wait a moment.');
-    return;
-  }
- 
-  // AGENT 4: sanitize input
-  const text = sanitizeInput(raw);
-  if (!text) return;
- 
-  inp.value = '';
-  inp.style.height = 'auto';
-  document.getElementById('char-counter').textContent = '0 / 500';
-  addMsg('user', text);
-  setTyp(true);
-  addUsed();
-  rateLimiter.record();
-  showUsageBar();
-  document.getElementById('sb').disabled = true;
- 
-  hist.push({ role: 'user', content: text });
- 
-  try {
-    const reply = await getAIResponse(hist, SYS);
-    hist.push({ role: 'assistant', content: reply });
-    setTyp(false);
-    addMsg('ai', reply);
-  } catch(err) {
-    setTyp(false);
-    // AGENT 4: never show raw error to user
-    localStorage.setItem(usageKey(), Math.max(0, getUsed() - 1));
-    showUsageBar();
-    let msg = 'Connection issue — please try again.';
-    if (err.message && err.message.startsWith('API_ERROR')) msg = 'Research service unavailable — please try again shortly.';
-    if (err.message === 'EMPTY_RESPONSE') msg = 'No results found — try rephrasing your question.';
-    if (err.name === 'AbortError') msg = 'Connection timed out — please try again.';
+async function send(){
+  const inp=document.getElementById('mi');const raw=inp.value.trim();if(!raw)return;
+  if(getRemaining()<=0){openUpgradeModal();return;}
+  if(!RL.canSend()){RL.showCooldown();showToast('Too many requests — please wait a moment.');return;}
+  const text=sanitize(raw);if(!text)return;
+  inp.value='';inp.style.height='auto';document.getElementById('char-counter').textContent='0 / 500';
+  addMsg('user',text);setTyp(true);addUsed();RL.record();showUsageBar();
+  document.getElementById('sb').disabled=true;
+  hist.push({role:'user',content:text});
+  try{
+    const reply=await getAIResponse(hist,SYS);
+    hist.push({role:'assistant',content:reply});
+    setTyp(false);addMsg('ai',reply);
+  }catch(err){
+    setTyp(false);localStorage.setItem(usageKey(),Math.max(0,getUsed()-1));showUsageBar();
+    let msg='Connection issue — please try again.';
+    if(err.message&&err.message.startsWith('API_ERROR'))msg='Research service unavailable — please try again shortly.';
+    if(err.message==='EMPTY_RESPONSE')msg='No results found — try rephrasing your question.';
+    if(err.name==='AbortError')msg='Connection timed out — please try again.';
     showToast(msg);
   }
- 
-  document.getElementById('sb').disabled = false;
-  inp.focus();
+  document.getElementById('sb').disabled=false;inp.focus();
 }
+function bookDemo(){window.location.href='mailto:support@wealthpilot.co?subject=WealthPilot%20Demo%20Request&body=Hi%2C%20I%27d%20like%20to%20book%20a%20free%2015-minute%20demo%20call.';}
+const qs=t=>{document.getElementById('mi').value=t;send();};
+const hk=e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();}};
+const ag=el=>{el.style.height='auto';el.style.height=Math.min(el.scrollHeight,110)+'px';};
  
-function bookDemo() {
-  window.location.href = 'mailto:support@wealthpilot.co?subject=WealthPilot%20Demo%20Request&body=Hi%2C%20I%27d%20like%20to%20book%20a%20free%2015-minute%20demo%20call.%20Please%20let%20me%20know%20your%20availability.';
-}
+// ── TOAST ──
+let toastTimer=null;
+function showToast(msg,good){const el=document.getElementById('toast');el.textContent=msg;el.className='toast'+(good?' good':'')+' show';clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.classList.remove('show'),4500);}
  
-const qs = t => { document.getElementById('mi').value = t; send(); };
-const hk = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
-const ag = el => { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
- 
-// ─────────────────────────────────────────
-// TOAST
-// ─────────────────────────────────────────
-let toastTimer = null;
-function showToast(msg, good) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast' + (good ? ' good' : '') + ' show';
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 4500);
-}
- 
-// ─────────────────────────────────────────
-// INIT
-// ─────────────────────────────────────────
-(function init() {
-  if (checkRoute()) return;
-  if (isAccessValid()) { enterApp(); return; }
-  document.getElementById('screen-gate').classList.add('on');
-})();
+// ── INIT ──
+(function init(){if(checkRoute())return;if(isAccessValid()){enterApp();return;}document.getElementById('screen-gate').classList.add('on');})();
 </script>
 </body>
 </html>
