@@ -415,7 +415,7 @@ const PLAN_CONFIG = {
   professional: { limit:100,  period:'month', label:'Professional' },
   enterprise:   { limit:9999, period:'month', label:'Enterprise' }
 };
-const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
+const SYS = `When answering questions about current-year figures (IRMAA thresholds, contribution limits, tax brackets, Medicare premiums), always use the web_search tool to verify exact figures from irs.gov, cms.gov, or ssa.gov before answering. Never rely on training data alone for current-year numbers.You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
 Expertise: Roth conversions, IRMAA planning, Social Security timing, RMD rules (SECURE 2.0), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, estate planning, 401k/IRA/HSA rules, capital gains optimization.
 RULES:
 1. Always cite your source at the end: "Source: [IRS Publication XXX] [IRC §XXX]" — use the most specific reference.
@@ -582,12 +582,13 @@ function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now
 async function getAIResponse(messages,sys){
   const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),30000);
   try{
-    const res=await fetch(AI_CONFIG.endpoint,{method:'POST',headers:{'content-type':'application/json'},signal:ctrl.signal,body:JSON.stringify({model:AI_CONFIG.model,max_tokens:AI_CONFIG.maxTokens,system:sys,messages})});
+    const res=await fetch(AI_CONFIG.endpoint,{method:'POST',headers:{'content-type':'application/json'},signal:ctrl.signal,body:JSON.stringify({model:AI_CONFIG.model,max_tokens:AI_CONFIG.maxTokens,system:sys,messages,tools:[{type:'web_search_20250305',name:'web_search',max_uses:3,allowed_domains:['irs.gov','cms.gov','ssa.gov','medicare.gov','dol.gov']}]})
     clearTimeout(t);
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error('API_ERROR:'+(e.error?.message||res.status));}
     const data=await res.json();
-    if(!data.content||!data.content[0]||!data.content[0].text)throw new Error('EMPTY_RESPONSE');
-    return data.content[0].text;
+   const reply=data.content.filter(b=>b.type==='text').at(-1)?.text;
+if(!reply)throw new Error('EMPTY_RESPONSE');
+return reply;
   }catch(e){clearTimeout(t);throw e;}
 }
  
