@@ -582,7 +582,7 @@ function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now
 async function getAIResponse(messages,sys){
   const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),30000);
   try{
-    const res=await fetch(AI_CONFIG.endpoint,{method:'POST',headers:{'content-type':'application/json'},signal:ctrl.signal,body:JSON.stringify({model:AI_CONFIG.model,max_tokens:AI_CONFIG.maxTokens,system:sys,messages,tools:[{type:'web_search_20250305',name:'web_search',max_uses:3,allowed_domains:['irs.gov','cms.gov','ssa.gov','medicare.gov','dol.gov']}]})
+    const res=await fetch(AI_CONFIG.endpoint,{method:'POST',headers:{'content-type':'application/json'},signal:ctrl.signal,body:JSON.stringify({model:AI_CONFIG.model,max_tokens:AI_CONFIG.maxTokens,system:sys,messages,tools:[{type:'web_search_20250305',name:'web_search',max_uses:3,allowed_domains:['irs.gov','cms.gov','ssa.gov','medicare.gov','dol.gov']}]}];
     clearTimeout(t);
     if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error('API_ERROR:'+(e.error?.message||res.status));}
     const data=await res.json();
