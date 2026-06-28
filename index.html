@@ -1,6 +1,3 @@
-Here is the complete fixed `index.html` — paste this whole thing into your GitHub repo (replace everything in the existing file):
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,6 +91,35 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .mt{font-size:11px;color:var(--dim);margin-top:3px;padding:0 3px}
 .mu .mt{text-align:right}
 .source-cite{background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px;font-size:11.5px;color:var(--gold);margin-top:8px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+/* AI TABLES */
+.ai-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;border-radius:8px;overflow:hidden}
+.ai-table th{background:rgba(245,166,35,0.15);color:var(--gold);padding:8px 12px;text-align:left;border:1px solid rgba(245,166,35,0.25);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
+.ai-table td{padding:7px 12px;border:1px solid var(--border);color:var(--muted);vertical-align:top;line-height:1.4}
+.ai-table tr:nth-child(even) td{background:rgba(255,255,255,0.02)}
+.ai-table tr:hover td{background:rgba(245,166,35,0.04);color:var(--text)}
+/* AI CALLOUT BLOCKS */
+.ai-callout{background:rgba(245,166,35,0.08);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:8px 12px;margin:8px 0;font-size:13px;color:#ffe08a;line-height:1.5}
+.ai-callout.red{background:rgba(248,113,113,0.08);border-left-color:var(--red);color:#fca5a5}
+.ai-callout.green{background:rgba(16,185,129,0.08);border-left-color:var(--green);color:#6ee7b7}
+/* COPY BUTTON */
+.msg-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:5px}
+.copy-btn{background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:7px;padding:3px 10px;font-size:11px;color:var(--dim);cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;gap:4px}
+.copy-btn:hover{border-color:var(--gold-b);color:var(--gold);background:var(--gold-dim)}
+.copy-btn.copied{color:var(--green);border-color:rgba(16,185,129,0.4)}
+/* ARTIFACT PANEL */
+.artifact-panel{background:var(--bg-card2);border:1px solid var(--border-g);border-radius:12px;margin-top:8px;overflow:hidden;animation:fu .3s ease}
+.artifact-header{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;cursor:pointer;user-select:none;border-bottom:1px solid var(--border)}
+.artifact-header:hover{background:rgba(255,255,255,0.02)}
+.artifact-label{display:flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--gold)}
+.artifact-toggle{font-size:11px;color:var(--dim);transition:transform .2s}
+.artifact-toggle.open{transform:rotate(180deg)}
+.artifact-body{padding:14px;display:none}
+.artifact-body.open{display:block}
+.artifact-chart{width:100%;overflow-x:auto}
+.artifact-chart svg{display:block;max-width:100%}
+/* OL support */
+.ma .mb ol{padding-left:1.4rem;margin:5px 0}
+.ma .mb ol li{margin-bottom:4px;color:var(--muted)}
 .tdots{display:none;align-items:center;gap:5px;padding:12px 15px;background:var(--bg-card);border:1px solid var(--border);border-radius:3px 13px 13px 13px;width:fit-content}
 .tdots.on{display:flex;animation:fu .2s ease}
 .dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:tb 1.3s infinite ease-in-out}
@@ -418,7 +444,19 @@ const PLAN_CONFIG = {
   professional: { limit:100,  period:'month', label:'Professional' },
   enterprise:   { limit:9999, period:'month', label:'Enterprise' }
 };
+
+// ── SYSTEM PROMPT — with 2026 fallback figures ──
 const SYS = `When answering questions about current-year figures (IRMAA thresholds, contribution limits, tax brackets, Medicare premiums), always use the web_search tool to verify exact figures from irs.gov, cms.gov, or ssa.gov before answering. Never rely on training data alone for current-year numbers.
+
+CURRENT YEAR REFERENCE DATA (use these if web search is unavailable):
+- 2026 IRMAA thresholds: Individual filers — $106,000 / $133,000 / $167,000 / $200,000 / $500,000. Married filing jointly — $212,000 / $266,000 / $334,000 / $400,000 / $750,000.
+- 2026 standard Medicare Part B premium: $185.00/month (base). Part D IRMAA surcharges apply above same income thresholds.
+- 2026 401(k) contribution limit: $23,500 (under 50), $31,000 (age 50–59 and 64+), $34,750 (age 60–63 super catch-up).
+- 2026 IRA contribution limit: $7,000 (under 50), $8,000 (age 50+).
+- 2026 Roth IRA phase-out: Single $150,000–$165,000. MFJ $236,000–$246,000.
+- 2026 Social Security COLA: 2.5% applied January 2026.
+- 2026 RMD age: 73 (SECURE 2.0 — age 75 applies to those born 1960 or later).
+Always prefer live web search results over these figures. Cite the source either way.
 
 You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
 Expertise: Roth conversions, IRMAA planning, Social Security timing, RMD rules (SECURE 2.0), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, estate planning, 401k/IRA/HSA rules, capital gains optimization.
@@ -428,7 +466,17 @@ RULES:
 3. Always end with: "Please verify this information against current IRS guidance before use with clients."
 4. Use exact dollar thresholds, percentages, and effective dates.
 5. Note when rules are scheduled to change (e.g. TCJA sunset provisions).
-Style: Professional, precise, structured. Headers and bullets for complex answers.`;
+FORMATTING RULES (always follow these):
+- Use markdown tables for: IRMAA brackets, contribution limits, RMD schedules, Social Security comparisons, tax brackets, phase-out ranges. Example table format:
+  | Income Range | Part B Premium | IRMAA Surcharge |
+  |---|---|---|
+  | Up to $106,000 | $185.00 | $0 |
+- Use blockquotes (> text) for critical warnings or key takeaways — e.g. > ⚠️ Important: Roth conversions count as MAGI for IRMAA.
+- Use numbered lists (1. 2. 3.) for sequential strategies or action steps.
+- Use bullet lists for feature comparisons or non-sequential items.
+- Use headers (##) to separate major sections in long answers.
+- Never give a wall of plain text when a table would be clearer.
+Style: Professional, precise, structured. Always prefer visual structure over prose for numerical data.`;
  
 // ── STORAGE ──
 const LS = { get:k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)), del:k=>localStorage.removeItem(k) };
@@ -584,33 +632,229 @@ function adminLogout(){adminAuthed=false;document.getElementById('admin-login').
 function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now();const active=leads.filter(l=>(now-l.ts)<ACCESS_DAYS*86400000).length;document.getElementById('admin-stats').innerHTML=`<div class="stat-box"><div class="stat-val">${leads.length}</div><div class="stat-lbl">Total signups</div></div><div class="stat-box"><div class="stat-val">${active}</div><div class="stat-lbl">Active (in trial)</div></div><div class="stat-box"><div class="stat-val">${leads.filter(l=>l.consent).length}</div><div class="stat-lbl">Consented</div></div>`;const tbody=document.getElementById('admin-tbody');if(!leads.length){tbody.innerHTML='<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>';return;}tbody.innerHTML=[...leads].reverse().map((l,i)=>{const d=new Date(l.ts);const exp=(Date.now()-l.ts)<ACCESS_DAYS*86400000;const dl=Math.max(0,ACCESS_DAYS-Math.floor((Date.now()-l.ts)/86400000));return`<tr><td style="color:var(--dim)">${leads.length-i}</td><td><strong>${esc(l.name)}</strong></td><td><a href="mailto:${esc(l.email)}" style="color:var(--gold)">${esc(l.email)}</a></td><td style="color:${l.consent?'var(--green)':'var(--red)'}">${l.consent?'&#10003; Yes':'&#10007; No'}</td><td style="color:var(--muted)">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td style="color:${exp?'var(--green)':'var(--red)'}">${exp?'Trial — '+dl+'d left':'Expired'}</td></tr>`;}).join('');}
  
 // ── AI ──
-async function getAIResponse(messages,sys){
-  const ctrl=new AbortController();const t=setTimeout(()=>ctrl.abort(),30000);
-  try{
-    const res=await fetch(AI_CONFIG.endpoint,{method:'POST',headers:{'content-type':'application/json'},signal:ctrl.signal,body:JSON.stringify({model:AI_CONFIG.model,max_tokens:AI_CONFIG.maxTokens,system:sys,messages,tools:[{type:'web_search_20250305',name:'web_search',max_uses:3,allowed_domains:['irs.gov','cms.gov','ssa.gov','medicare.gov','dol.gov']}]})});
+async function getAIResponse(messages, sys) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 30000);
+  try {
+    const res = await fetch(AI_CONFIG.endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      signal: ctrl.signal,
+      body: JSON.stringify({
+        model: AI_CONFIG.model,
+        max_tokens: AI_CONFIG.maxTokens,
+        system: sys,
+        messages,
+        tools: [{
+          type: 'web_search_20250305',
+          name: 'web_search',
+          max_uses: 3,
+          allowed_domains: ['irs.gov', 'cms.gov', 'ssa.gov', 'medicare.gov', 'dol.gov']
+        }]
+      })
+    });
     clearTimeout(t);
-    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error('API_ERROR:'+(e.error?.message||res.status));}
-    const data=await res.json();
-    const reply=data.content.filter(b=>b.type==='text').at(-1)?.text;
-    if(!reply)throw new Error('EMPTY_RESPONSE');
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error('API_ERROR:' + (e.error?.message || res.status));
+    }
+    const data = await res.json();
+    const reply = data.content.filter(b => b.type === 'text').at(-1)?.text;
+    if (!reply) throw new Error('EMPTY_RESPONSE');
     return reply;
-  }catch(e){clearTimeout(t);throw e;}
+  } catch(e) {
+    clearTimeout(t);
+    throw e;
+  }
 }
  
 function extractCitation(text){const m=text.match(/Source:\s*([^\n]+)/i);if(m)return m[1].trim();if(/IRS|IRC|Publication|SSA|Medicare/i.test(text))return null;return'Verify with IRS.gov before client use';}
  
-function fmtAI(text){return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h3>$1</h3>').replace(/^# (.+)$/gm,'<h3>$1</h3>').replace(/^- (.+)$/gm,'<li>$1</li>').replace(/(<li>.*<\/li>\n?)+/g,s=>'<ul>'+s+'</ul>').replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');}
+function fmtAI(raw) {
+  // 1. Extract and protect tables before escaping
+  const tableBlocks = [];
+  let text = raw.replace(/(\|.+\|\n)((?:\|[-: |]+\|\n))((?:\|.+\|\n?)*)/g, (match) => {
+    const lines = match.trim().split('\n').filter(l => l.trim());
+    if (lines.length < 2) return match;
+    const headers = lines[0].split('|').filter(c => c.trim()).map(c => `<th>${escHtml(c.trim())}</th>`).join('');
+    const rows = lines.slice(2).map(r =>
+      '<tr>' + r.split('|').filter(c => c.trim()).map(c => `<td>${escHtml(c.trim())}</td>`).join('') + '</tr>'
+    ).join('');
+    const tbl = `<div class="artifact-chart"><table class="ai-table"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
+    tableBlocks.push(tbl);
+    return `%%TABLE_${tableBlocks.length - 1}%%`;
+  });
+
+  // 2. HTML escape the rest
+  text = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  // 3. Inline formatting
+  text = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace">$1</code>');
+
+  // 4. Headers
+  text = text
+    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+    .replace(/^## (.+)$/gm,  '<h3>$1</h3>')
+    .replace(/^# (.+)$/gm,   '<h3>$1</h3>');
+
+  // 5. Blockquote callouts  > text
+  text = text.replace(/^&gt;\s*⚠️(.*)$/gm, '<div class="ai-callout red">⚠️$1</div>');
+  text = text.replace(/^&gt;\s*✅(.*)$/gm,  '<div class="ai-callout green">✅$1</div>');
+  text = text.replace(/^&gt;\s*(.+)$/gm,    '<div class="ai-callout">$1</div>');
+
+  // 6. Ordered lists  1. item
+  text = text.replace(/((?:^\d+\.\s.+$\n?)+)/gm, match => {
+    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^\d+\.\s/,'')}</li>`).join('');
+    return `<ol>${items}</ol>`;
+  });
+
+  // 7. Unordered lists  - item
+  text = text.replace(/((?:^- .+$\n?)+)/gm, match => {
+    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^- /,'')}</li>`).join('');
+    return `<ul>${items}</ul>`;
+  });
+
+  // 8. Paragraphs
+  text = text.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+
+  // 9. Restore tables
+  tableBlocks.forEach((tbl, i) => { text = text.replace(`%%TABLE_${i}%%`, tbl); });
+
+  return text;
+}
+function escHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function esc(t){const d=document.createElement('div');d.appendChild(document.createTextNode(String(t)));return d.innerHTML;}
  
-let hist=[];
-function addMsg(role,text){
-  const msgs=document.getElementById('msgs');const td=document.getElementById('tdots');const ws=document.getElementById('ws');
-  if(ws&&ws.style.display!=='none')ws.style.display='none';
-  const wrap=document.createElement('div');wrap.className='msg '+(role==='user'?'mu':'ma');
-  const t=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-  if(role==='ai'){const cite=extractCitation(text);const citeHTML=cite?`<div class="source-cite"><span>&#128204;</span> <strong>Source:</strong> ${esc(cite)}</div>`:'';wrap.innerHTML=`<div class="mb">${fmtAI(text)}${citeHTML}</div><div class="mt">${t} &middot; AI Research &middot; Verify before use</div>`;}
-  else{wrap.innerHTML=`<div class="mb">${esc(text)}</div><div class="mt">${t}</div>`;}
-  msgs.insertBefore(wrap,td);msgs.scrollTop=msgs.scrollHeight;
+let msgId = 0;
+function addMsg(role, text) {
+  const msgs = document.getElementById('msgs');
+  const td   = document.getElementById('tdots');
+  const ws   = document.getElementById('ws');
+  if (ws && ws.style.display !== 'none') ws.style.display = 'none';
+
+  const wrap = document.createElement('div');
+  const id   = 'msg-' + (++msgId);
+  wrap.className = 'msg ' + (role === 'user' ? 'mu' : 'ma');
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+
+  if (role === 'ai') {
+    const formatted = fmtAI(text);
+    const cite = extractCitation(text);
+    const citeHTML = cite
+      ? `<div class="source-cite"><span>&#128204;</span> <strong>Source:</strong> ${esc(cite)}</div>`
+      : '';
+
+    // Detect if response contains a table → show artifact panel
+    const hasTable = text.includes('|---') || text.includes('| ---') || /\|.+\|/.test(text);
+    const artifactHTML = hasTable ? buildArtifactPanel(text, id) : '';
+
+    wrap.innerHTML = `
+      <div class="mb" id="${id}-body">${formatted}${citeHTML}</div>
+      ${artifactHTML}
+      <div class="msg-actions">
+        <button class="copy-btn" onclick="copyMsg('${id}', this)" title="Copy answer">&#128203; Copy</button>
+      </div>
+      <div class="mt">${t} &middot; AI Research &middot; Verify before use</div>`;
+  } else {
+    wrap.innerHTML = `<div class="mb">${esc(text)}</div><div class="mt">${t}</div>`;
+  }
+
+  msgs.insertBefore(wrap, td);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function copyMsg(id, btn) {
+  const el = document.getElementById(id + '-body');
+  if (!el) return;
+  const plain = el.innerText || el.textContent || '';
+  navigator.clipboard.writeText(plain).then(() => {
+    btn.textContent = '✓ Copied';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.innerHTML = '&#128203; Copy'; btn.classList.remove('copied'); }, 2000);
+  }).catch(() => showToast('Copy failed — select text manually.'));
+}
+
+function buildArtifactPanel(rawText, id) {
+  // Try to extract a simple chart from the first table in rawText
+  const tableMatch = rawText.match(/\|(.+)\|\n\|[-: |]+\|\n((?:\|.+\|\n?)*)/);
+  if (!tableMatch) return '';
+
+  const headers = tableMatch[1].split('|').map(h => h.trim()).filter(Boolean);
+  const rows = tableMatch[2].trim().split('\n').map(r =>
+    r.split('|').map(c => c.trim()).filter(Boolean)
+  );
+
+  // Try to build a bar chart from the last numeric column
+  const chartSVG = buildBarChart(headers, rows);
+  if (!chartSVG) return '';
+
+  return `
+    <div class="artifact-panel">
+      <div class="artifact-header" onclick="toggleArtifact('${id}-art')">
+        <span class="artifact-label">&#128202; Visual Chart &mdash; ${esc(headers[0])} Breakdown</span>
+        <span class="artifact-toggle" id="${id}-art-icon">&#9660;</span>
+      </div>
+      <div class="artifact-body" id="${id}-art">
+        <div class="artifact-chart">${chartSVG}</div>
+        <p style="font-size:11px;color:var(--dim);margin-top:8px;text-align:center">Auto-generated from AI response data &middot; Verify figures with cited source</p>
+      </div>
+    </div>`;
+}
+
+function toggleArtifact(id) {
+  const body = document.getElementById(id);
+  const icon = document.getElementById(id + '-icon');
+  if (!body) return;
+  const isOpen = body.classList.toggle('open');
+  if (icon) icon.classList.toggle('open', isOpen);
+}
+
+function buildBarChart(headers, rows) {
+  if (!rows.length || !headers.length) return null;
+
+  // Find first column with numeric values
+  let numCol = -1;
+  for (let c = 1; c < headers.length; c++) {
+    const hasNum = rows.some(r => r[c] && /[\d,.$]+/.test(r[c]));
+    if (hasNum) { numCol = c; break; }
+  }
+  if (numCol < 0) return null;
+
+  // Extract labels and values
+  const items = rows.map(r => ({
+    label: r[0] || '',
+    raw: r[numCol] || '0',
+    val: parseFloat((r[numCol] || '0').replace(/[^0-9.]/g,'')) || 0
+  })).filter(i => i.val > 0).slice(0, 8);
+
+  if (items.length < 2) return null;
+
+  const max = Math.max(...items.map(i => i.val));
+  const W = 560, barH = 28, gap = 10, labelW = 160, padT = 10, padB = 30;
+  const H = items.length * (barH + gap) + padT + padB;
+
+  const bars = items.map((item, i) => {
+    const y = padT + i * (barH + gap);
+    const bw = Math.max(4, Math.round(((W - labelW - 80) * item.val) / max));
+    const lbl = item.label.length > 22 ? item.label.slice(0,20)+'…' : item.label;
+    return `
+      <text x="${labelW - 6}" y="${y + barH/2 + 4}" text-anchor="end" fill="#9ca3af" font-size="11" font-family="system-ui,sans-serif">${escHtml(lbl)}</text>
+      <rect x="${labelW}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="url(#bg)"/>
+      <text x="${labelW + bw + 6}" y="${y + barH/2 + 4}" fill="#f5a623" font-size="11" font-weight="700" font-family="system-ui,sans-serif">${escHtml(item.raw)}</text>`;
+  }).join('');
+
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#f5a623" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="#f7b84b" stop-opacity="0.5"/>
+      </linearGradient>
+    </defs>
+    <text x="${W/2}" y="${H - 8}" text-anchor="middle" fill="#6b7280" font-size="10" font-family="system-ui,sans-serif">${escHtml(headers[numCol])}</text>
+    ${bars}
+  </svg>`;
 }
 function setTyp(on){document.getElementById('tdots').classList.toggle('on',on);if(on)document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;}
  
