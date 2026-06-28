@@ -434,7 +434,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
  
 <script>
 // ── CONFIG ──
-const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5', maxTokens:1024 };
+const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5', maxTokens:2048 };
 const ACCESS_DAYS = 14;
 const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
 const MAX_QUERY = 500;
@@ -445,38 +445,38 @@ const PLAN_CONFIG = {
   enterprise:   { limit:9999, period:'month', label:'Enterprise' }
 };
 
-// ── SYSTEM PROMPT — with 2026 fallback figures ──
-const SYS = `When answering questions about current-year figures (IRMAA thresholds, contribution limits, tax brackets, Medicare premiums), always use the web_search tool to verify exact figures from irs.gov, cms.gov, or ssa.gov before answering. Never rely on training data alone for current-year numbers.
+// ── SYSTEM PROMPT ──
+const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
 
-CURRENT YEAR REFERENCE DATA (use these if web search is unavailable):
-- 2026 IRMAA thresholds: Individual filers — $106,000 / $133,000 / $167,000 / $200,000 / $500,000. Married filing jointly — $212,000 / $266,000 / $334,000 / $400,000 / $750,000.
-- 2026 standard Medicare Part B premium: $185.00/month (base). Part D IRMAA surcharges apply above same income thresholds.
-- 2026 401(k) contribution limit: $23,500 (under 50), $31,000 (age 50–59 and 64+), $34,750 (age 60–63 super catch-up).
-- 2026 IRA contribution limit: $7,000 (under 50), $8,000 (age 50+).
-- 2026 Roth IRA phase-out: Single $150,000–$165,000. MFJ $236,000–$246,000.
-- 2026 Social Security COLA: 2.5% applied January 2026.
-- 2026 RMD age: 73 (SECURE 2.0 — age 75 applies to those born 1960 or later).
-Always prefer live web search results over these figures. Cite the source either way.
+SEARCH POLICY — IMPORTANT: Only use web_search when the user explicitly asks for "latest", "current", or "2026" figures AND you need to verify a specific number. Do NOT search for strategy questions, rule explanations, or conceptual questions — answer those directly from your knowledge. Unnecessary searches add 15–25 seconds to response time.
 
-You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
-Expertise: Roth conversions, IRMAA planning, Social Security timing, RMD rules (SECURE 2.0), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, estate planning, 401k/IRA/HSA rules, capital gains optimization.
-RULES:
-1. Always cite your source at the end: "Source: [IRS Publication XXX] [IRC §XXX]" — use the most specific reference.
-2. If uncertain of a specific code section, cite "IRS.gov" and note the advisor should verify.
+VERIFIED 2026 REFERENCE DATA (use these directly without searching):
+- IRMAA thresholds (Individual): ≤$106,000 = base; $106,001–$133,000 = Tier 1; $133,001–$167,000 = Tier 2; $167,001–$200,000 = Tier 3; $200,001–$500,000 = Tier 4; >$500,000 = Tier 5.
+- IRMAA thresholds (MFJ): ≤$212,000 = base; $212,001–$266,000 = Tier 1; $266,001–$334,000 = Tier 2; $334,001–$400,000 = Tier 3; $400,001–$750,000 = Tier 4; >$750,000 = Tier 5.
+- Medicare Part B 2026: $185.00/month base. IRMAA surcharges: Tier 1 +$74.00, Tier 2 +$185.00, Tier 3 +$295.90, Tier 4 +$406.90, Tier 5 +$443.90.
+- 401(k) 2026: $23,500 (under 50); $31,000 (age 50–59, 64+); $34,750 (age 60–63 super catch-up).
+- IRA 2026: $7,000 (under 50); $8,000 (age 50+).
+- Roth IRA phase-out 2026: Single $150,000–$165,000; MFJ $236,000–$246,000.
+- SS COLA 2026: 2.5% (applied January 2026).
+- RMD age: 73 under SECURE 2.0; age 75 for those born 1960 or later.
+- Standard deduction 2026: Single $15,000; MFJ $30,000.
+
+EXPERTISE: Roth conversions, IRMAA planning, Social Security timing, RMD rules (SECURE 2.0), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, 401k/IRA/HSA rules, capital gains optimization, estate planning.
+
+ANSWER RULES:
+1. Cite source at end: "Source: [IRS Publication XXX] [IRC §XXX]" — most specific reference available.
+2. If uncertain of code section, cite "IRS.gov" and note advisor should verify.
 3. Always end with: "Please verify this information against current IRS guidance before use with clients."
 4. Use exact dollar thresholds, percentages, and effective dates.
-5. Note when rules are scheduled to change (e.g. TCJA sunset provisions).
-FORMATTING RULES (always follow these):
-- Use markdown tables for: IRMAA brackets, contribution limits, RMD schedules, Social Security comparisons, tax brackets, phase-out ranges. Example table format:
-  | Income Range | Part B Premium | IRMAA Surcharge |
-  |---|---|---|
-  | Up to $106,000 | $185.00 | $0 |
-- Use blockquotes (> text) for critical warnings or key takeaways — e.g. > ⚠️ Important: Roth conversions count as MAGI for IRMAA.
-- Use numbered lists (1. 2. 3.) for sequential strategies or action steps.
-- Use bullet lists for feature comparisons or non-sequential items.
-- Use headers (##) to separate major sections in long answers.
-- Never give a wall of plain text when a table would be clearer.
-Style: Professional, precise, structured. Always prefer visual structure over prose for numerical data.`;
+5. Flag rules scheduled to change (e.g. TCJA sunset 2025/2026).
+
+FORMATTING (always follow):
+- Tables for: IRMAA brackets, contribution limits, RMD schedules, SS comparisons, tax brackets, phase-outs.
+- Blockquotes for warnings: > ⚠️ for red alerts, > ✅ for confirmations, > for gold callouts.
+- Numbered lists for sequential steps or strategies.
+- Bullets for comparisons or feature lists.
+- ## headers for major sections in long answers.
+- Never use a wall of plain text when a table is clearer.`;
  
 // ── STORAGE ──
 const LS = { get:k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)), del:k=>localStorage.removeItem(k) };
@@ -634,7 +634,19 @@ function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now
 // ── AI ──
 async function getAIResponse(messages, sys) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 30000);
+  // Web search adds ~10-20s — give 55s total before timeout
+  const t = setTimeout(() => ctrl.abort(), 55000);
+
+  // Show progressive loading hints so user knows it's working
+  const hints = [
+    { ms: 4000,  text: '🔍 Searching IRS and SSA sources...' },
+    { ms: 12000, text: '📋 Verifying 2026 figures from CMS.gov...' },
+    { ms: 24000, text: '✍️ Composing your answer...' },
+    { ms: 38000, text: '⏳ Almost done — complex query takes a moment...' },
+  ];
+  const hintTimers = hints.map(h => setTimeout(() => showLoadingHint(h.text), h.ms));
+  const clearHints = () => hintTimers.forEach(clearTimeout);
+
   try {
     const res = await fetch(AI_CONFIG.endpoint, {
       method: 'POST',
@@ -644,28 +656,40 @@ async function getAIResponse(messages, sys) {
         model: AI_CONFIG.model,
         max_tokens: AI_CONFIG.maxTokens,
         system: sys,
-        messages,
-        tools: [{
-          type: 'web_search_20250305',
-          name: 'web_search',
-          max_uses: 3,
-          allowed_domains: ['irs.gov', 'cms.gov', 'ssa.gov', 'medicare.gov', 'dol.gov']
-        }]
+        messages
       })
     });
-    clearTimeout(t);
+    clearTimeout(t); clearHints(); clearLoadingHint();
     if (!res.ok) {
       const e = await res.json().catch(() => ({}));
       throw new Error('API_ERROR:' + (e.error?.message || res.status));
     }
     const data = await res.json();
+    // Handle both plain text and tool-use responses
     const reply = data.content.filter(b => b.type === 'text').at(-1)?.text;
     if (!reply) throw new Error('EMPTY_RESPONSE');
     return reply;
   } catch(e) {
-    clearTimeout(t);
+    clearTimeout(t); clearHints(); clearLoadingHint();
     throw e;
   }
+}
+
+// ── LOADING HINT (shown under typing dots) ──
+function showLoadingHint(msg) {
+  let el = document.getElementById('loading-hint');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-hint';
+    el.style.cssText = 'font-size:11.5px;color:#f5a623;text-align:center;margin-top:6px;animation:fu .3s ease;opacity:0.85;flex-shrink:0';
+    const tdots = document.getElementById('tdots');
+    if (tdots && tdots.parentNode) tdots.parentNode.insertBefore(el, tdots.nextSibling);
+  }
+  el.textContent = msg;
+}
+function clearLoadingHint() {
+  const el = document.getElementById('loading-hint');
+  if (el) el.remove();
 }
  
 function extractCitation(text){const m=text.match(/Source:\s*([^\n]+)/i);if(m)return m[1].trim();if(/IRS|IRC|Publication|SSA|Medicare/i.test(text))return null;return'Verify with IRS.gov before client use';}
