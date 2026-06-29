@@ -877,6 +877,7 @@ function buildBarChart(headers, rows) {
 }
 function setTyp(on){document.getElementById('tdots').classList.toggle('on',on);if(on)document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;}
  
+let hist=[];
 async function send(){
   const inp=document.getElementById('mi');const raw=inp.value.trim();if(!raw)return;
   if(getRemaining()<=0){openUpgradeModal();return;}
