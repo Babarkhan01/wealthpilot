@@ -434,7 +434,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
  
 <script>
 // ── CONFIG ──
-const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5', maxTokens:2048 };
+const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5-20250929', maxTokens:1500 };
 const ACCESS_DAYS = 14;
 const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
 const MAX_QUERY = 500;
@@ -634,15 +634,12 @@ function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now
 // ── AI ──
 async function getAIResponse(messages, sys) {
   const ctrl = new AbortController();
-  // Web search adds ~10-20s — give 55s total before timeout
-  const t = setTimeout(() => ctrl.abort(), 55000);
+  const t = setTimeout(() => ctrl.abort(), 25000);
 
-  // Show progressive loading hints so user knows it's working
+  // Loading hints
   const hints = [
-    { ms: 4000,  text: '🔍 Searching IRS and SSA sources...' },
-    { ms: 12000, text: '📋 Verifying 2026 figures from CMS.gov...' },
-    { ms: 24000, text: '✍️ Composing your answer...' },
-    { ms: 38000, text: '⏳ Almost done — complex query takes a moment...' },
+    { ms: 4000,  text: '✍️ Composing your answer...' },
+    { ms: 12000, text: '⏳ Almost ready...' },
   ];
   const hintTimers = hints.map(h => setTimeout(() => showLoadingHint(h.text), h.ms));
   const clearHints = () => hintTimers.forEach(clearTimeout);
@@ -888,15 +885,16 @@ async function send(){
   if(!RL.canSend()){RL.showCooldown();showToast('Too many requests — please wait a moment.');return;}
   const text=sanitize(raw);if(!text)return;
   inp.value='';inp.style.height='auto';document.getElementById('char-counter').textContent='0 / 500';
-  addMsg('user',text);setTyp(true);addUsed();RL.record();showUsageBar();
+  addMsg('user',text);setTyp(true);RL.record();
   document.getElementById('sb').disabled=true;
   hist.push({role:'user',content:text});
   try{
     const reply=await getAIResponse(hist,SYS);
     hist.push({role:'assistant',content:reply});
+    addUsed();showUsageBar();
     setTyp(false);addMsg('ai',reply);
   }catch(err){
-    setTyp(false);localStorage.setItem(usageKey(),Math.max(0,getUsed()-1));showUsageBar();
+    setTyp(false);
     let msg='Connection issue — please try again.';
     if(err.message&&err.message.startsWith('API_ERROR'))msg='Research service unavailable — please try again shortly.';
     if(err.message==='EMPTY_RESPONSE')msg='No results found — try rephrasing your question.';
