@@ -632,7 +632,7 @@ function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now
 // ── AI ──
 async function getAIResponse(messages, sys) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 25000);
+  const t = setTimeout(() => ctrl.abort(), 60000);
 
   // Loading hints
   const hints = [
