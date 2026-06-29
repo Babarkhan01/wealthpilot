@@ -434,7 +434,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
  
 <script>
 // ── CONFIG ──
-const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5-20250929', maxTokens:1500 };
+const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5', maxTokens:2048 };
 const ACCESS_DAYS = 14;
 const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
 const MAX_QUERY = 500;
@@ -447,8 +447,6 @@ const PLAN_CONFIG = {
 
 // ── SYSTEM PROMPT ──
 const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
-
-SEARCH POLICY — IMPORTANT: Only use web_search when the user explicitly asks for "latest", "current", or "2026" figures AND you need to verify a specific number. Do NOT search for strategy questions, rule explanations, or conceptual questions — answer those directly from your knowledge. Unnecessary searches add 15–25 seconds to response time.
 
 VERIFIED 2026 REFERENCE DATA (use these directly without searching):
 - IRMAA thresholds (Individual): ≤$106,000 = base; $106,001–$133,000 = Tier 1; $133,001–$167,000 = Tier 2; $167,001–$200,000 = Tier 3; $200,001–$500,000 = Tier 4; >$500,000 = Tier 5.
