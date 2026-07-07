@@ -635,10 +635,11 @@ function inlineFmt(text){
 // not raw markdown text. No client-side parsing of table syntax needed.
 async function getAIResponse(messages, sys) {
   const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), 60000);
+  const t = setTimeout(() => ctrl.abort(), 120000);
   const hints = [
     { ms: 4000,  text: '✍️ Composing your answer...' },
-    { ms: 12000, text: '⏳ Almost ready...' },
+    { ms: 12000, text: '📊 Building tables and citations...' },
+    { ms: 30000, text: '⏳ Almost ready...' },
   ];
   const hintTimers = hints.map(h => setTimeout(() => showLoadingHint(h.text), h.ms));
   const clearHints = () => hintTimers.forEach(clearTimeout);
