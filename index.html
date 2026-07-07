@@ -90,7 +90,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 .ma .mb p:last-child{margin-bottom:0}
 .mt{font-size:11px;color:var(--dim);margin-top:3px;padding:0 3px}
 .mu .mt{text-align:right}
-.source-cite{background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:6px 12px;font-size:11.5px;color:var(--gold);margin-top:8px;display:flex;align-items:flex-start;gap:6px;line-height:1.5}
+.source-cite{background:rgba(245,166,35,0.07);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:8px 12px;font-size:11.5px;color:var(--gold);margin-top:8px;display:flex;align-items:flex-start;gap:6px;line-height:1.6}
 /* AI TABLES */
 .ai-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px;border-radius:8px;overflow:hidden}
 .ai-table th{background:rgba(245,166,35,0.15);color:var(--gold);padding:8px 12px;text-align:left;border:1px solid rgba(245,166,35,0.25);font-weight:700;font-size:11px;text-transform:uppercase;letter-spacing:.06em}
@@ -434,7 +434,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
  
 <script>
 // ── CONFIG ──
-const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev', model:'claude-sonnet-4-5', maxTokens:2048 };
+const AI_CONFIG = { endpoint:'https://empty-block-1f07.babar-wealthpilot.workers.dev' };
 const ACCESS_DAYS = 14;
 const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
 const MAX_QUERY = 500;
@@ -444,10 +444,10 @@ const PLAN_CONFIG = {
   professional: { limit:100,  period:'month', label:'Professional' },
   enterprise:   { limit:9999, period:'month', label:'Enterprise' }
 };
-
 // ── SYSTEM PROMPT ──
+// Structure is now enforced by the worker's forced tool schema.
+// This prompt only needs to cover domain accuracy — not formatting instructions.
 const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
-
 VERIFIED 2026 REFERENCE DATA (use these directly without searching):
 - IRMAA thresholds (Individual): ≤$106,000 = base; $106,001–$133,000 = Tier 1; $133,001–$167,000 = Tier 2; $167,001–$200,000 = Tier 3; $200,001–$500,000 = Tier 4; >$500,000 = Tier 5.
 - IRMAA thresholds (MFJ): ≤$212,000 = base; $212,001–$266,000 = Tier 1; $266,001–$334,000 = Tier 2; $334,001–$400,000 = Tier 3; $400,001–$750,000 = Tier 4; >$750,000 = Tier 5.
@@ -458,23 +458,13 @@ VERIFIED 2026 REFERENCE DATA (use these directly without searching):
 - SS COLA 2026: 2.5% (applied January 2026).
 - RMD age: 73 under SECURE 2.0; age 75 for those born 1960 or later.
 - Standard deduction 2026: Single $15,000; MFJ $30,000.
-
 EXPERTISE: Roth conversions, IRMAA planning, Social Security timing, RMD rules (SECURE 2.0), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, 401k/IRA/HSA rules, capital gains optimization, estate planning.
-
-ANSWER RULES:
-1. Cite source at end: "Source: [IRS Publication XXX] [IRC §XXX]" — most specific reference available.
-2. If uncertain of code section, cite "IRS.gov" and note advisor should verify.
-3. Always end with: "Please verify this information against current IRS guidance before use with clients."
-4. Use exact dollar thresholds, percentages, and effective dates.
-5. Flag rules scheduled to change (e.g. TCJA sunset 2025/2026).
-
-FORMATTING (always follow):
-- Tables for: IRMAA brackets, contribution limits, RMD schedules, SS comparisons, tax brackets, phase-outs.
-- Blockquotes for warnings: > ⚠️ for red alerts, > ✅ for confirmations, > for gold callouts.
-- Numbered lists for sequential steps or strategies.
-- Bullets for comparisons or feature lists.
-- ## headers for major sections in long answers.
-- Never use a wall of plain text when a table is clearer.`;
+CONTENT RULES:
+1. Populate authoritative_sources with the most specific reference available (IRS Publication, IRC section, SSA.gov, CMS.gov). If uncertain of the exact section, cite "IRS.gov" and note the advisor should verify.
+2. Use exact dollar thresholds, percentages, and effective dates from the reference data above.
+3. Flag rules scheduled to change (e.g. TCJA sunset) inside major_risks or detailed_analysis.
+4. Put every table-shaped fact (IRMAA brackets, contribution limits, RMD schedules, tax brackets, Social Security comparisons) into the visuals array as a "table" — never inline as text.
+5. disclaimer must always remind the advisor to verify against current IRS guidance before client use.`;
  
 // ── STORAGE ──
 const LS = { get:k=>{try{return JSON.parse(localStorage.getItem(k))}catch{return null}}, set:(k,v)=>localStorage.setItem(k,JSON.stringify(v)), del:k=>localStorage.removeItem(k) };
@@ -629,47 +619,47 @@ function adminLogin(){const pw=document.getElementById('admin-pw').value;if(pw==
 function adminLogout(){adminAuthed=false;document.getElementById('admin-login').style.display='flex';document.getElementById('admin-dash').style.display='none';document.getElementById('admin-pw').value='';document.getElementById('admin-login-err').style.display='none';}
 function renderAdminDash(){const leads=LS.get('wp_leads')||[];const now=Date.now();const active=leads.filter(l=>(now-l.ts)<ACCESS_DAYS*86400000).length;document.getElementById('admin-stats').innerHTML=`<div class="stat-box"><div class="stat-val">${leads.length}</div><div class="stat-lbl">Total signups</div></div><div class="stat-box"><div class="stat-val">${active}</div><div class="stat-lbl">Active (in trial)</div></div><div class="stat-box"><div class="stat-val">${leads.filter(l=>l.consent).length}</div><div class="stat-lbl">Consented</div></div>`;const tbody=document.getElementById('admin-tbody');if(!leads.length){tbody.innerHTML='<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>';return;}tbody.innerHTML=[...leads].reverse().map((l,i)=>{const d=new Date(l.ts);const exp=(Date.now()-l.ts)<ACCESS_DAYS*86400000;const dl=Math.max(0,ACCESS_DAYS-Math.floor((Date.now()-l.ts)/86400000));return`<tr><td style="color:var(--dim)">${leads.length-i}</td><td><strong>${esc(l.name)}</strong></td><td><a href="mailto:${esc(l.email)}" style="color:var(--gold)">${esc(l.email)}</a></td><td style="color:${l.consent?'var(--green)':'var(--red)'}">${l.consent?'&#10003; Yes':'&#10007; No'}</td><td style="color:var(--muted)">${d.toLocaleDateString()} ${d.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</td><td style="color:${exp?'var(--green)':'var(--red)'}">${exp?'Trial — '+dl+'d left':'Expired'}</td></tr>`;}).join('');}
  
-// ── AI ──
+// ── ESCAPING HELPERS ──
+function esc(t){const d=document.createElement('div');d.appendChild(document.createTextNode(String(t==null?'':t)));return d.innerHTML;}
+function escHtml(t){return esc(t);}
+function inlineFmt(text){
+  if(!text) return '';
+  let t = esc(text);
+  t = t.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  t = t.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
+  return t;
+}
+ 
+// ── AI CALL ──
+// Worker now returns { report: {...} } — a 10-section structured object,
+// not raw markdown text. No client-side parsing of table syntax needed.
 async function getAIResponse(messages, sys) {
   const ctrl = new AbortController();
   const t = setTimeout(() => ctrl.abort(), 60000);
-
-  // Loading hints
   const hints = [
     { ms: 4000,  text: '✍️ Composing your answer...' },
     { ms: 12000, text: '⏳ Almost ready...' },
   ];
   const hintTimers = hints.map(h => setTimeout(() => showLoadingHint(h.text), h.ms));
   const clearHints = () => hintTimers.forEach(clearTimeout);
-
   try {
     const res = await fetch(AI_CONFIG.endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
       signal: ctrl.signal,
-      body: JSON.stringify({
-        model: AI_CONFIG.model,
-        max_tokens: AI_CONFIG.maxTokens,
-        system: sys,
-        messages
-      })
+      body: JSON.stringify({ system: sys, messages })
     });
     clearTimeout(t); clearHints(); clearLoadingHint();
-    if (!res.ok) {
-      const e = await res.json().catch(() => ({}));
-      throw new Error('API_ERROR:' + (e.error?.message || res.status));
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.report) {
+      throw new Error('API_ERROR:' + (data.error?.message || res.status));
     }
-    const data = await res.json();
-    // Handle both plain text and tool-use responses
-    const reply = data.content.filter(b => b.type === 'text').at(-1)?.text;
-    if (!reply) throw new Error('EMPTY_RESPONSE');
-    return reply;
+    return data.report;
   } catch(e) {
     clearTimeout(t); clearHints(); clearLoadingHint();
     throw e;
   }
 }
-
 // ── LOADING HINT (shown under typing dots) ──
 function showLoadingHint(msg) {
   let el = document.getElementById('loading-hint');
@@ -687,103 +677,154 @@ function clearLoadingHint() {
   if (el) el.remove();
 }
  
-function extractCitation(text){const m=text.match(/Source:\s*([^\n]+)/i);if(m)return m[1].trim();if(/IRS|IRC|Publication|SSA|Medicare/i.test(text))return null;return'Verify with IRS.gov before client use';}
- 
-function fmtAI(raw) {
-  // 1. Extract and protect tables before escaping
-  const tableBlocks = [];
-  let text = raw.replace(/(\|.+\|\n)((?:\|[-: |]+\|\n))((?:\|.+\|\n?)*)/g, (match) => {
-    const lines = match.trim().split('\n').filter(l => l.trim());
-    if (lines.length < 2) return match;
-    const headers = lines[0].split('|').filter(c => c.trim()).map(c => `<th>${escHtml(c.trim())}</th>`).join('');
-    const rows = lines.slice(2).map(r =>
-      '<tr>' + r.split('|').filter(c => c.trim()).map(c => `<td>${escHtml(c.trim())}</td>`).join('') + '</tr>'
-    ).join('');
-    const tbl = `<div class="artifact-chart"><table class="ai-table"><thead><tr>${headers}</tr></thead><tbody>${rows}</tbody></table></div>`;
-    tableBlocks.push(tbl);
-    return `%%TABLE_${tableBlocks.length - 1}%%`;
-  });
-
-  // 2. HTML escape the rest
-  text = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-
-  // 3. Inline formatting
-  text = text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.07);padding:1px 5px;border-radius:4px;font-size:12px;font-family:monospace">$1</code>');
-
-  // 4. Headers
-  text = text
-    .replace(/^### (.+)$/gm, '<h3>$1</h3>')
-    .replace(/^## (.+)$/gm,  '<h3>$1</h3>')
-    .replace(/^# (.+)$/gm,   '<h3>$1</h3>');
-
-  // 5. Blockquote callouts  > text
-  text = text.replace(/^&gt;\s*⚠️(.*)$/gm, '<div class="ai-callout red">⚠️$1</div>');
-  text = text.replace(/^&gt;\s*✅(.*)$/gm,  '<div class="ai-callout green">✅$1</div>');
-  text = text.replace(/^&gt;\s*(.+)$/gm,    '<div class="ai-callout">$1</div>');
-
-  // 6. Ordered lists  1. item
-  text = text.replace(/((?:^\d+\.\s.+$\n?)+)/gm, match => {
-    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^\d+\.\s/,'')}</li>`).join('');
-    return `<ol>${items}</ol>`;
-  });
-
-  // 7. Unordered lists  - item
-  text = text.replace(/((?:^- .+$\n?)+)/gm, match => {
-    const items = match.trim().split('\n').map(l => `<li>${l.replace(/^- /,'')}</li>`).join('');
-    return `<ul>${items}</ul>`;
-  });
-
-  // 8. Paragraphs
-  text = text.replace(/\n\n/g,'<br><br>').replace(/\n/g,'<br>');
-
-  // 9. Restore tables
-  tableBlocks.forEach((tbl, i) => { text = text.replace(`%%TABLE_${i}%%`, tbl); });
-
-  return text;
+// ── SOURCES ──
+function buildSourcesHTML(sources) {
+  if (!sources || !sources.length) return '';
+  const items = sources.map(s => {
+    const parts = [esc(s.source || 'IRS.gov')];
+    if (s.tax_year) parts.push('Tax Year ' + esc(s.tax_year));
+    if (s.last_updated) parts.push('Updated ' + esc(s.last_updated));
+    const label = parts.join(' &middot; ');
+    return s.url
+      ? `<a href="${esc(s.url)}" target="_blank" rel="noopener" style="color:inherit;text-decoration:underline">${label}</a>`
+      : label;
+  }).join('<br>');
+  return `<div class="source-cite"><span>&#128204;</span><div><strong>Sources:</strong><br>${items}</div></div>`;
 }
-function escHtml(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function esc(t){const d=document.createElement('div');d.appendChild(document.createTextNode(String(t)));return d.innerHTML;}
+ 
+// ── CALLOUT / LIST SECTIONS ──
+function buildCalloutList(items, cls) {
+  if (!items || !items.length) return '';
+  return items.map(it => `<div class="ai-callout ${cls}"><strong>${esc(it.title)}:</strong> ${inlineFmt(it.description)}</div>`).join('');
+}
+function buildChecklist(items) {
+  if (!items || !items.length) return '';
+  const rows = items.map(i => `<li>${inlineFmt(i)}</li>`).join('');
+  return `<h3>Advisor Checklist</h3><ul>${rows}</ul>`;
+}
+ 
+// ── VISUALS (tables / charts / checklists / generic) ──
+let chartCounter = 0;
+function toggleArtifact(headerEl) {
+  const body = headerEl.nextElementSibling;
+  const icon = headerEl.querySelector('.artifact-toggle');
+  if (!body) return;
+  const isOpen = body.classList.toggle('open');
+  if (icon) icon.classList.toggle('open', isOpen);
+}
+function artifactWrap(icon, title, innerHTML, openByDefault) {
+  return `<div class="artifact-panel">
+    <div class="artifact-header" onclick="toggleArtifact(this)">
+      <span class="artifact-label">${icon} ${esc(title)}</span>
+      <span class="artifact-toggle${openByDefault ? ' open' : ''}">&#9660;</span>
+    </div>
+    <div class="artifact-body${openByDefault ? ' open' : ''}">${innerHTML}</div>
+  </div>`;
+}
+function rowsToArray(row) { return Array.isArray(row) ? row : Object.values(row || {}); }
+function renderVisual(v) {
+  if (!v || !v.type || !v.data) return '';
+  const title = v.title || v.type;
+  if (v.type === 'table' && Array.isArray(v.data.columns) && Array.isArray(v.data.rows)) {
+    const thead = v.data.columns.map(c => `<th>${esc(c)}</th>`).join('');
+    const rows = v.data.rows.map(r => `<tr>${rowsToArray(r).map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+    return artifactWrap('&#128202;', title, `<div class="artifact-chart"><table class="ai-table"><thead><tr>${thead}</tr></thead><tbody>${rows}</tbody></table></div>`, true);
+  }
+  if (v.type === 'bar_chart' && Array.isArray(v.data.rows)) {
+    const svg = buildBarChartFromRows(v.data.columns || ['Label','Value'], v.data.rows, title);
+    if (svg) return artifactWrap('&#128200;', title, `<div class="artifact-chart">${svg}</div>`, true);
+  }
+  if (v.type === 'checklist' && Array.isArray(v.data.items)) {
+    const rows = v.data.items.map(i => `<li>${esc(i)}</li>`).join('');
+    return artifactWrap('&#9989;', title, `<ul>${rows}</ul>`, true);
+  }
+  if ((v.type === 'timeline' || v.type === 'decision_matrix') && Array.isArray(v.data.columns) && Array.isArray(v.data.rows)) {
+    const thead = v.data.columns.map(c => `<th>${esc(c)}</th>`).join('');
+    const rows = v.data.rows.map(r => `<tr>${rowsToArray(r).map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
+    return artifactWrap('&#128197;', title, `<div class="artifact-chart"><table class="ai-table"><thead><tr>${thead}</tr></thead><tbody>${rows}</tbody></table></div>`, true);
+  }
+  // Generic fallback for line_chart / flow_diagram / anything unrecognized —
+  // still render something readable rather than dropping the data.
+  return artifactWrap('&#128203;', title, `<div style="font-size:12px;color:var(--muted);white-space:pre-wrap">${esc(JSON.stringify(v.data,null,2))}</div>`, false);
+}
+function buildBarChartFromRows(columns, rows, title) {
+  let numCol = -1;
+  for (let c = 1; c < columns.length; c++) {
+    const sample = rows.map(r => rowsToArray(r)[c]);
+    if (sample.some(val => /[\d,.$]+/.test(String(val)))) { numCol = c; break; }
+  }
+  if (numCol < 0) numCol = 1;
+  const items = rows.map(r => {
+    const arr = rowsToArray(r);
+    return { label: String(arr[0] || ''), raw: String(arr[numCol] || '0'), val: parseFloat(String(arr[numCol] || '0').replace(/[^0-9.]/g,'')) || 0 };
+  }).filter(i => i.val > 0).slice(0, 8);
+  if (items.length < 2) return null;
+  const max = Math.max(...items.map(i => i.val));
+  const W = 560, barH = 28, gap = 10, labelW = 160, padT = 10, padB = 30;
+  const H = items.length * (barH + gap) + padT + padB;
+  const gid = 'bg' + (++chartCounter);
+  const bars = items.map((item, i) => {
+    const y = padT + i * (barH + gap);
+    const bw = Math.max(4, Math.round(((W - labelW - 80) * item.val) / max));
+    const lbl = item.label.length > 22 ? item.label.slice(0,20)+'…' : item.label;
+    return `
+      <text x="${labelW - 6}" y="${y + barH/2 + 4}" text-anchor="end" fill="#9ca3af" font-size="11" font-family="system-ui,sans-serif">${escHtml(lbl)}</text>
+      <rect x="${labelW}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="url(#${gid})"/>
+      <text x="${labelW + bw + 6}" y="${y + barH/2 + 4}" fill="#f5a623" font-size="11" font-weight="700" font-family="system-ui,sans-serif">${escHtml(item.raw)}</text>`;
+  }).join('');
+  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="${gid}" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#f5a623" stop-opacity="0.9"/>
+        <stop offset="100%" stop-color="#f7b84b" stop-opacity="0.5"/>
+      </linearGradient>
+    </defs>
+    <text x="${W/2}" y="${H - 8}" text-anchor="middle" fill="#6b7280" font-size="10" font-family="system-ui,sans-serif">${escHtml(columns[numCol] || title || '')}</text>
+    ${bars}
+  </svg>`;
+}
+ 
+// ── REPORT → HTML ──
+function buildReportHTML(r) {
+  let html = '';
+  if (r.executive_summary) html += `<p>${inlineFmt(r.executive_summary)}</p>`;
+  if (r.client_profile)    html += `<h3>Client Profile</h3><p>${inlineFmt(r.client_profile)}</p>`;
+  html += buildCalloutList(r.planning_opportunities, 'green');
+  html += buildCalloutList(r.major_risks, 'red');
+  if (r.recommendation) html += `<div class="ai-callout"><strong>Recommendation:</strong> ${inlineFmt(r.recommendation)}</div>`;
+  if (Array.isArray(r.visuals)) r.visuals.forEach(v => { html += renderVisual(v); });
+  if (r.detailed_analysis) html += `<h3>Detailed Analysis</h3><p>${inlineFmt(r.detailed_analysis)}</p>`;
+  html += buildChecklist(r.advisor_checklist);
+  if (r.disclaimer) html += `<p style="font-size:11px;color:var(--dim);margin-top:10px">${inlineFmt(r.disclaimer)}</p>`;
+  return html || '<p>No content returned — please try rephrasing your question.</p>';
+}
  
 let msgId = 0;
-function addMsg(role, text) {
+function addMsg(role, content) {
   const msgs = document.getElementById('msgs');
   const td   = document.getElementById('tdots');
   const ws   = document.getElementById('ws');
   if (ws && ws.style.display !== 'none') ws.style.display = 'none';
-
   const wrap = document.createElement('div');
   const id   = 'msg-' + (++msgId);
   wrap.className = 'msg ' + (role === 'user' ? 'mu' : 'ma');
   const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-
   if (role === 'ai') {
-    const formatted = fmtAI(text);
-    const cite = extractCitation(text);
-    const citeHTML = cite
-      ? `<div class="source-cite"><span>&#128204;</span> <strong>Source:</strong> ${esc(cite)}</div>`
-      : '';
-
-    // Detect if response contains a table → show artifact panel
-    const hasTable = text.includes('|---') || text.includes('| ---') || /\|.+\|/.test(text);
-    const artifactHTML = hasTable ? buildArtifactPanel(text, id) : '';
-
+    const report = content; // structured report object from the worker
+    const bodyHTML = buildReportHTML(report);
+    const sourcesHTML = buildSourcesHTML(report.authoritative_sources);
     wrap.innerHTML = `
-      <div class="mb" id="${id}-body">${formatted}${citeHTML}</div>
-      ${artifactHTML}
+      <div class="mb" id="${id}-body">${bodyHTML}${sourcesHTML}</div>
       <div class="msg-actions">
         <button class="copy-btn" onclick="copyMsg('${id}', this)" title="Copy answer">&#128203; Copy</button>
       </div>
       <div class="mt">${t} &middot; AI Research &middot; Verify before use</div>`;
   } else {
-    wrap.innerHTML = `<div class="mb">${esc(text)}</div><div class="mt">${t}</div>`;
+    wrap.innerHTML = `<div class="mb">${esc(content)}</div><div class="mt">${t}</div>`;
   }
-
   msgs.insertBefore(wrap, td);
   msgs.scrollTop = msgs.scrollHeight;
 }
-
 function copyMsg(id, btn) {
   const el = document.getElementById(id + '-body');
   if (!el) return;
@@ -793,87 +834,6 @@ function copyMsg(id, btn) {
     btn.classList.add('copied');
     setTimeout(() => { btn.innerHTML = '&#128203; Copy'; btn.classList.remove('copied'); }, 2000);
   }).catch(() => showToast('Copy failed — select text manually.'));
-}
-
-function buildArtifactPanel(rawText, id) {
-  // Try to extract a simple chart from the first table in rawText
-  const tableMatch = rawText.match(/\|(.+)\|\n\|[-: |]+\|\n((?:\|.+\|\n?)*)/);
-  if (!tableMatch) return '';
-
-  const headers = tableMatch[1].split('|').map(h => h.trim()).filter(Boolean);
-  const rows = tableMatch[2].trim().split('\n').map(r =>
-    r.split('|').map(c => c.trim()).filter(Boolean)
-  );
-
-  // Try to build a bar chart from the last numeric column
-  const chartSVG = buildBarChart(headers, rows);
-  if (!chartSVG) return '';
-
-  return `
-    <div class="artifact-panel">
-      <div class="artifact-header" onclick="toggleArtifact('${id}-art')">
-        <span class="artifact-label">&#128202; Visual Chart &mdash; ${esc(headers[0])} Breakdown</span>
-        <span class="artifact-toggle" id="${id}-art-icon">&#9660;</span>
-      </div>
-      <div class="artifact-body" id="${id}-art">
-        <div class="artifact-chart">${chartSVG}</div>
-        <p style="font-size:11px;color:var(--dim);margin-top:8px;text-align:center">Auto-generated from AI response data &middot; Verify figures with cited source</p>
-      </div>
-    </div>`;
-}
-
-function toggleArtifact(id) {
-  const body = document.getElementById(id);
-  const icon = document.getElementById(id + '-icon');
-  if (!body) return;
-  const isOpen = body.classList.toggle('open');
-  if (icon) icon.classList.toggle('open', isOpen);
-}
-
-function buildBarChart(headers, rows) {
-  if (!rows.length || !headers.length) return null;
-
-  // Find first column with numeric values
-  let numCol = -1;
-  for (let c = 1; c < headers.length; c++) {
-    const hasNum = rows.some(r => r[c] && /[\d,.$]+/.test(r[c]));
-    if (hasNum) { numCol = c; break; }
-  }
-  if (numCol < 0) return null;
-
-  // Extract labels and values
-  const items = rows.map(r => ({
-    label: r[0] || '',
-    raw: r[numCol] || '0',
-    val: parseFloat((r[numCol] || '0').replace(/[^0-9.]/g,'')) || 0
-  })).filter(i => i.val > 0).slice(0, 8);
-
-  if (items.length < 2) return null;
-
-  const max = Math.max(...items.map(i => i.val));
-  const W = 560, barH = 28, gap = 10, labelW = 160, padT = 10, padB = 30;
-  const H = items.length * (barH + gap) + padT + padB;
-
-  const bars = items.map((item, i) => {
-    const y = padT + i * (barH + gap);
-    const bw = Math.max(4, Math.round(((W - labelW - 80) * item.val) / max));
-    const lbl = item.label.length > 22 ? item.label.slice(0,20)+'…' : item.label;
-    return `
-      <text x="${labelW - 6}" y="${y + barH/2 + 4}" text-anchor="end" fill="#9ca3af" font-size="11" font-family="system-ui,sans-serif">${escHtml(lbl)}</text>
-      <rect x="${labelW}" y="${y}" width="${bw}" height="${barH}" rx="4" fill="url(#bg)"/>
-      <text x="${labelW + bw + 6}" y="${y + barH/2 + 4}" fill="#f5a623" font-size="11" font-weight="700" font-family="system-ui,sans-serif">${escHtml(item.raw)}</text>`;
-  }).join('');
-
-  return `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="bg" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#f5a623" stop-opacity="0.9"/>
-        <stop offset="100%" stop-color="#f7b84b" stop-opacity="0.5"/>
-      </linearGradient>
-    </defs>
-    <text x="${W/2}" y="${H - 8}" text-anchor="middle" fill="#6b7280" font-size="10" font-family="system-ui,sans-serif">${escHtml(headers[numCol])}</text>
-    ${bars}
-  </svg>`;
 }
 function setTyp(on){document.getElementById('tdots').classList.toggle('on',on);if(on)document.getElementById('msgs').scrollTop=document.getElementById('msgs').scrollHeight;}
  
@@ -888,15 +848,17 @@ async function send(){
   document.getElementById('sb').disabled=true;
   hist.push({role:'user',content:text});
   try{
-    const reply=await getAIResponse(hist,SYS);
-    hist.push({role:'assistant',content:reply});
+    const report=await getAIResponse(hist,SYS);
+    // Store a plain-text summary in history (not the raw tool_use block) so
+    // multi-turn follow-up questions still have context for the next call.
+    const summary = [report.executive_summary, report.recommendation].filter(Boolean).join(' ') || 'Report generated.';
+    hist.push({role:'assistant',content: summary});
     addUsed();showUsageBar();
-    setTyp(false);addMsg('ai',reply);
+    setTyp(false);addMsg('ai',report);
   }catch(err){
     setTyp(false);
     let msg='Connection issue — please try again.';
     if(err.message&&err.message.startsWith('API_ERROR'))msg='Research service unavailable — please try again shortly.';
-    if(err.message==='EMPTY_RESPONSE')msg='No results found — try rephrasing your question.';
     if(err.name==='AbortError')msg='Connection timed out — please try again.';
     showToast(msg);
   }
