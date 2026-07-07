@@ -124,6 +124,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 #sb:hover{background:var(--gold-h);transform:scale(1.05)}
 #sb:disabled{opacity:.4;cursor:not-allowed;transform:none}
 .i-hint{font-size:10.5px;color:var(--dim)}
+.mode-toggle{display:flex;gap:4px}
+.mode-btn{background:none;border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--muted);cursor:pointer;font-family:var(--font);transition:all .15s;white-space:nowrap}
+.mode-btn:hover{border-color:var(--gold-b);color:var(--text)}
+.mode-btn.active{border-color:var(--gold-b);color:var(--gold);background:var(--gold-dim)}
 
 /* ── Copy button ── */
 .msg-actions{display:flex;justify-content:flex-end;gap:6px;margin-top:5px}
@@ -468,7 +472,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
         </div>
       </div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
-        <div class="i-hint">Research only &middot; Verify all outputs &middot; <a onclick="showTerms()" style="color:var(--dim);cursor:pointer;font-size:10.5px">Terms</a></div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="mode-toggle" role="group" aria-label="Response mode">
+            <button class="mode-btn active" id="mode-chat" onclick="setMode('chat')" aria-pressed="true">&#128172; Chat</button>
+            <button class="mode-btn" id="mode-report" onclick="setMode('report')" aria-pressed="false">&#128202; Research Report</button>
+          </div>
+          <span class="i-hint"><a onclick="showTerms()" style="color:var(--dim);cursor:pointer;font-size:10.5px">Terms</a></span>
+        </div>
         <div class="char-counter" id="char-counter" aria-live="polite">0 / 500</div>
       </div>
     </div>
@@ -955,16 +965,23 @@ function inlineFmt(text) {
 // Managed at module level so the same timers can be cleared from any path,
 // preventing ghost hints after an aborted or superseded request.
 
-const _hintStages = [
-  { ms: 3_000,  text: '&#x270D; Composing research analysis...' },
+// Separate hint stages per mode.
+// Report mode: three progressive hints that match the ~20-40s generation time.
+// Chat mode:   a single soft hint that fires only if Haiku takes unusually long.
+const _reportHintStages = [
+  { ms:  3_000, text: '&#x270D; Composing research analysis...' },
   { ms: 10_000, text: '&#x1F4CA; Building tables and citations...' },
   { ms: 28_000, text: '&#x231B; Finalizing structured report...' },
 ];
+const _chatHintStages = [
+  { ms: 3_000, text: '&#x1F4AC; Thinking...' },
+];
 let _hintTimers = [];
 
-function _startHintTimers() {
+function _startHintTimers(mode) {
   _clearHintTimers();
-  _hintTimers = _hintStages.map(s =>
+  const stages = mode === 'report' ? _reportHintStages : _chatHintStages;
+  _hintTimers = stages.map(s =>
     setTimeout(() => _showLoadingHint(s.text), s.ms)
   );
 }
@@ -1029,7 +1046,7 @@ const _userCancelledCtrls = new WeakSet();
  *   'API:<msg>' — worker returned a non-2xx status.
  *   'INVALID'   — response body couldn't be parsed or had no expected fields.
  */
-async function getAIResponse(messages, sys) {
+async function getAIResponse(messages, sys, mode = 'chat') {
   // ── Cancel any in-flight request before starting a new one ──────────────
   if (_currentCtrl) {
     // Mark BEFORE calling abort() so the catch block sees the WeakSet entry
@@ -1047,14 +1064,14 @@ async function getAIResponse(messages, sys) {
     if (_currentCtrl === ctrl) ctrl.abort();
   }, REQUEST_TIMEOUT_MS);
 
-  _startHintTimers();
+  _startHintTimers(mode);
 
   try {
     const res = await fetch(AI_CONFIG.endpoint, {
       method:  'POST',
       headers: { 'content-type': 'application/json' },
       signal:  ctrl.signal,
-      body:    JSON.stringify({ system: sys, messages }),
+      body:    JSON.stringify({ system: sys, messages, mode }),
     });
 
     clearTimeout(timeoutId);
@@ -1568,6 +1585,25 @@ function setTyping(on) {
   if (on) msgs.scrollTop = msgs.scrollHeight;
 }
 
+// ─── Mode toggle ──────────────────────────────────────────────────────────────
+
+/**
+ * Active response mode: 'chat' (default) or 'report'.
+ * Sent to the worker in every request so it routes deterministically without
+ * needing to guess intent from message content.
+ */
+let _mode = 'chat';
+
+function setMode(m) {
+  _mode = m;
+  const chatBtn   = document.getElementById('mode-chat');
+  const reportBtn = document.getElementById('mode-report');
+  chatBtn.classList.toggle('active', m === 'chat');
+  reportBtn.classList.toggle('active', m === 'report');
+  chatBtn.setAttribute('aria-pressed', String(m === 'chat'));
+  reportBtn.setAttribute('aria-pressed', String(m === 'report'));
+}
+
 // ─── Conversation & send ──────────────────────────────────────────────────────
 
 let hist = [];
@@ -1609,7 +1645,7 @@ async function send() {
   if (hist.length > MAX_HIST) hist.splice(0, hist.length - MAX_HIST);
 
   try {
-    const result = await getAIResponse(hist, SYS);
+    const result = await getAIResponse(hist, SYS, _mode);
 
     // If another send() fired after us, our result is stale — drop it silently.
     if (mySeq !== _sendSeq) return;
