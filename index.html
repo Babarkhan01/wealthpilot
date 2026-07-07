@@ -744,7 +744,25 @@ function renderVisual(v) {
     const rows = v.data.rows.map(r => `<tr>${rowsToArray(r).map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('');
     return artifactWrap('&#128197;', title, `<div class="artifact-chart"><table class="ai-table"><thead><tr>${thead}</tr></thead><tbody>${rows}</tbody></table></div>`, true);
   }
-  // Generic fallback for line_chart / flow_diagram / anything unrecognized —
+  // decision_matrix as returned in practice: { criteria: [...], options: [{name, scores:[...]}] }
+  if (v.type === 'decision_matrix' && Array.isArray(v.data.criteria) && Array.isArray(v.data.options)) {
+    const thead = ['Option', ...v.data.criteria].map(c => `<th>${esc(c)}</th>`).join('');
+    const rows = v.data.options.map(o => `<tr><td><strong>${esc(o.name)}</strong></td>${(o.scores || []).map(s => `<td>${esc(s)}</td>`).join('')}</tr>`).join('');
+    return artifactWrap('&#128202;', title, `<div class="artifact-chart"><table class="ai-table"><thead><tr>${thead}</tr></thead><tbody>${rows}</tbody></table></div>`, true);
+  }
+  // timeline as returned in practice: { events: [{date, label, description}] }
+  if (v.type === 'timeline' && Array.isArray(v.data.events)) {
+    const items = v.data.events.map(e => `
+      <div style="display:flex;gap:12px;margin-bottom:10px;align-items:flex-start">
+        <div style="flex-shrink:0;min-width:64px;font-weight:700;color:var(--gold);font-size:12px">${esc(e.date || '')}</div>
+        <div>
+          <div style="font-weight:600;font-size:12.5px;margin-bottom:2px;color:var(--text)">${esc(e.label || '')}</div>
+          <div style="color:var(--muted);font-size:12px;line-height:1.5">${esc(e.description || '')}</div>
+        </div>
+      </div>`).join('');
+    return artifactWrap('&#128197;', title, `<div>${items}</div>`, true);
+  }
+  // Generic fallback for line_chart / flow_diagram / anything still unrecognized —
   // still render something readable rather than dropping the data.
   return artifactWrap('&#128203;', title, `<div style="font-size:12px;color:var(--muted);white-space:pre-wrap">${esc(JSON.stringify(v.data,null,2))}</div>`, false);
 }
