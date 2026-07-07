@@ -583,9 +583,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const AI_CONFIG = { endpoint: 'https://empty-block-1f07.babar-wealthpilot.workers.dev' };
-const ACCESS_DAYS = 14;
-const ADMIN_PASS = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
-const MAX_QUERY = 500;
+const ACCESS_DAYS  = 14;
+const ADMIN_PASS   = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
+const MAX_QUERY    = 500;
+/** Maximum messages retained in conversation history sent to the API. */
+const MAX_HIST     = 10;
+/** Request timeout in milliseconds (2 minutes). */
+const REQUEST_TIMEOUT_MS = 120_000;
+
 const PLAN_CONFIG = {
   free:         { limit: 5,    period: 'total', label: 'Free Trial' },
   starter:      { limit: 30,   period: 'month', label: 'Starter' },
@@ -646,9 +651,19 @@ const getRemaining = () => Math.max(0, PLAN_CONFIG[getUserPlan()].limit - getUse
 
 const RL = {
   reqs: [], max: 10, timer: null,
-  canSend() { const n = Date.now(); this.reqs = this.reqs.filter(t => n - t < 60000); return this.reqs.length < this.max; },
-  record()  { this.reqs.push(Date.now()); },
-  secs()    { return this.reqs.length ? Math.ceil((60000 - (Date.now() - Math.min(...this.reqs))) / 1000) : 0; },
+  canSend() {
+    const n = Date.now();
+    this.reqs = this.reqs.filter(t => n - t < 60_000);
+    return this.reqs.length < this.max;
+  },
+  record() { this.reqs.push(Date.now()); },
+  /** Seconds until the oldest request ages out of the 60-second window. */
+  secs() {
+    if (!this.reqs.length) return 0;
+    // Use reduce instead of spread to avoid stack overflow with large arrays.
+    const oldest = this.reqs.reduce((a, b) => (a < b ? a : b));
+    return Math.ceil((60_000 - (Date.now() - oldest)) / 1_000);
+  },
   showCooldown() {
     const b = document.getElementById('rate-bar');
     b.style.display = 'block';
@@ -659,16 +674,18 @@ const RL = {
       s--;
       if (s <= 0) { b.style.display = 'none'; clearInterval(this.timer); }
       else document.getElementById('rate-countdown').textContent = s;
-    }, 1000);
+    }, 1_000);
   },
 };
 
 // ─── Input helpers ────────────────────────────────────────────────────────────
 
+/** Persistent element used for HTML escaping — avoids repeated allocations. */
+const _escDiv = document.createElement('div');
+
 function sanitize(t) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(t));
-  return d.innerHTML.trim().substring(0, MAX_QUERY);
+  _escDiv.textContent = t;
+  return _escDiv.innerHTML.trim().substring(0, MAX_QUERY);
 }
 
 function updateCharCount(el) {
@@ -682,7 +699,7 @@ function updateCharCount(el) {
 // ─── User / gate ──────────────────────────────────────────────────────────────
 
 function getUser() { return LS.get('wp_user'); }
-function isAccessValid() { const u = getUser(); return !!u && (Date.now() - u.ts) < ACCESS_DAYS * 86400000; }
+function isAccessValid() { const u = getUser(); return !!u && (Date.now() - u.ts) < ACCESS_DAYS * 86_400_000; }
 
 function submitGate(e) {
   e.preventDefault();
@@ -877,7 +894,7 @@ function adminLogout() {
 function renderAdminDash() {
   const leads = LS.get('wp_leads') || [];
   const now   = Date.now();
-  const active = leads.filter(l => (now - l.ts) < ACCESS_DAYS * 86400000).length;
+  const active = leads.filter(l => (now - l.ts) < ACCESS_DAYS * 86_400_000).length;
   document.getElementById('admin-stats').innerHTML =
     `<div class="stat-box"><div class="stat-val">${leads.length}</div><div class="stat-lbl">Total signups</div></div>` +
     `<div class="stat-box"><div class="stat-val">${active}</div><div class="stat-lbl">Active (in trial)</div></div>` +
@@ -886,8 +903,8 @@ function renderAdminDash() {
   if (!leads.length) { tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>'; return; }
   tbody.innerHTML = [...leads].reverse().map((l, i) => {
     const d   = new Date(l.ts);
-    const exp = (Date.now() - l.ts) < ACCESS_DAYS * 86400000;
-    const dl  = Math.max(0, ACCESS_DAYS - Math.floor((Date.now() - l.ts) / 86400000));
+    const exp = (Date.now() - l.ts) < ACCESS_DAYS * 86_400_000;
+    const dl  = Math.max(0, ACCESS_DAYS - Math.floor((Date.now() - l.ts) / 86_400_000));
     return `<tr>
       <td style="color:var(--dim)">${leads.length - i}</td>
       <td><strong>${esc(l.name)}</strong></td>
@@ -902,9 +919,8 @@ function renderAdminDash() {
 // ─── Escape & formatting helpers ──────────────────────────────────────────────
 
 function esc(t) {
-  const d = document.createElement('div');
-  d.appendChild(document.createTextNode(String(t == null ? '' : t)));
-  return d.innerHTML;
+  _escDiv.textContent = String(t == null ? '' : t);
+  return _escDiv.innerHTML;
 }
 
 /**
@@ -934,36 +950,117 @@ function inlineFmt(text) {
   return t;
 }
 
+// ─── Loading hint ─────────────────────────────────────────────────────────────
+//
+// Managed at module level so the same timers can be cleared from any path,
+// preventing ghost hints after an aborted or superseded request.
+
+const _hintStages = [
+  { ms: 3_000,  text: '&#x270D; Composing research analysis...' },
+  { ms: 10_000, text: '&#x1F4CA; Building tables and citations...' },
+  { ms: 28_000, text: '&#x231B; Finalizing structured report...' },
+];
+let _hintTimers = [];
+
+function _startHintTimers() {
+  _clearHintTimers();
+  _hintTimers = _hintStages.map(s =>
+    setTimeout(() => _showLoadingHint(s.text), s.ms)
+  );
+}
+
+function _clearHintTimers() {
+  _hintTimers.forEach(clearTimeout);
+  _hintTimers = [];
+  _removeLoadingHint();
+}
+
+function _showLoadingHint(html) {
+  let el = document.getElementById('loading-hint');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'loading-hint';
+    el.className = 'loading-hint';
+    // Insert after the typing dots; fall back to appending to msgs.
+    const tdots = document.getElementById('tdots');
+    const msgs  = document.getElementById('msgs');
+    if (tdots && tdots.parentNode === msgs) {
+      msgs.insertBefore(el, tdots.nextSibling);
+    } else {
+      msgs.appendChild(el);
+    }
+  }
+  el.innerHTML = html;
+}
+
+function _removeLoadingHint() {
+  document.getElementById('loading-hint')?.remove();
+}
+
 // ─── AI call ──────────────────────────────────────────────────────────────────
 
 /**
- * Calls the worker and returns a typed response object:
- *   { type: 'reply', text: string }        — conversational response
- *   { type: 'report', report: object, warnings?: string[] } — financial report
+ * Tracks the AbortController for the current in-flight request so a new
+ * send() can cancel it before issuing the next request.
  *
- * Throws typed errors: 'TIMEOUT', 'NETWORK', 'API:<message>', 'INVALID'
+ * Cancellation reason is tracked per-controller in a WeakSet (_userCancelledCtrls)
+ * rather than a shared global flag. This avoids a race where a new send() resets
+ * the global before the old request's catch block can read it, which would cause
+ * a superseded request to misreport as TIMEOUT instead of CANCELLED.
+ */
+let _currentCtrl = null;
+
+/**
+ * Controllers that were aborted by a newer send() (user-initiated cancellation).
+ * Controllers NOT in this set that throw AbortError were timed out.
+ * WeakSet entries are automatically GC'd when the controller is collected.
+ */
+const _userCancelledCtrls = new WeakSet();
+
+/**
+ * Calls the worker and returns a typed response object:
+ *   { type: 'reply', text: string }
+ *   { type: 'report', report: object, warnings?: string[] }
+ *
+ * Throws typed errors:
+ *   'CANCELLED' — superseded by a newer send(); caller should silently ignore.
+ *   'TIMEOUT'   — request exceeded REQUEST_TIMEOUT_MS.
+ *   'NETWORK'   — fetch failed (offline, DNS, CORS, etc.).
+ *   'API:<msg>' — worker returned a non-2xx status.
+ *   'INVALID'   — response body couldn't be parsed or had no expected fields.
  */
 async function getAIResponse(messages, sys) {
-  const ctrl    = new AbortController();
-  const timeout = setTimeout(() => ctrl.abort(), 120000);
+  // ── Cancel any in-flight request before starting a new one ──────────────
+  if (_currentCtrl) {
+    // Mark BEFORE calling abort() so the catch block sees the WeakSet entry
+    // regardless of microtask ordering.
+    _userCancelledCtrls.add(_currentCtrl);
+    _currentCtrl.abort();
+  }
 
-  const LOADING_STAGES = [
-    { ms: 3000,  text: '&#x270D; Composing research analysis...' },
-    { ms: 10000, text: '&#x1F4CA; Building tables and citations...' },
-    { ms: 28000, text: '&#x231B; Finalizing structured report...' },
-  ];
-  const hintTimers = LOADING_STAGES.map(s => setTimeout(() => showLoadingHint(s.text), s.ms));
-  const clearHints = () => { hintTimers.forEach(clearTimeout); clearLoadingHint(); };
+  const ctrl = new AbortController();
+  _currentCtrl = ctrl;
+
+  const timeoutId = setTimeout(() => {
+    // Only abort if this controller is still the active one.
+    // Do NOT add to _userCancelledCtrls — this is a timeout, not a cancellation.
+    if (_currentCtrl === ctrl) ctrl.abort();
+  }, REQUEST_TIMEOUT_MS);
+
+  _startHintTimers();
 
   try {
     const res = await fetch(AI_CONFIG.endpoint, {
-      method: 'POST',
+      method:  'POST',
       headers: { 'content-type': 'application/json' },
-      signal: ctrl.signal,
-      body: JSON.stringify({ system: sys, messages }),
+      signal:  ctrl.signal,
+      body:    JSON.stringify({ system: sys, messages }),
     });
-    clearTimeout(timeout);
-    clearHints();
+
+    clearTimeout(timeoutId);
+    _clearHintTimers();
+    // Unregister as the active controller once the fetch completes.
+    if (_currentCtrl === ctrl) _currentCtrl = null;
 
     let data;
     try { data = await res.json(); } catch { throw new Error('INVALID'); }
@@ -983,31 +1080,35 @@ async function getAIResponse(messages, sys) {
     }
 
     throw new Error('INVALID');
+
   } catch (err) {
-    clearTimeout(timeout);
-    clearHints();
-    if (err.name === 'AbortError') throw new Error('TIMEOUT');
-    if (err.message === 'Failed to fetch' || err.message === 'NetworkError when attempting to fetch resource.') throw new Error('NETWORK');
+    clearTimeout(timeoutId);
+    _clearHintTimers();
+    if (_currentCtrl === ctrl) _currentCtrl = null;
+
+    if (err.name === 'AbortError') {
+      // Check the per-controller WeakSet — not a shared mutable flag.
+      // This is race-safe: we added the entry before calling .abort(), so
+      // by the time this catch block runs the WeakSet already has it.
+      throw new Error(_userCancelledCtrls.has(ctrl) ? 'CANCELLED' : 'TIMEOUT');
+    }
+
+    // Detect network failures across browsers:
+    //   Chrome:  "Failed to fetch"
+    //   Firefox: "NetworkError when attempting to fetch resource."
+    //   Safari:  "Load failed"
+    // Also catches offline / DNS failure (TypeError subclass).
+    if (
+      err instanceof TypeError ||
+      err.message === 'Failed to fetch' ||
+      err.message === 'NetworkError when attempting to fetch resource.' ||
+      err.message === 'Load failed'
+    ) {
+      throw new Error('NETWORK');
+    }
+
     throw err;
   }
-}
-
-// ─── Loading hint ─────────────────────────────────────────────────────────────
-
-function showLoadingHint(html) {
-  let el = document.getElementById('loading-hint');
-  if (!el) {
-    el = document.createElement('div');
-    el.id = 'loading-hint';
-    el.className = 'loading-hint';
-    const tdots = document.getElementById('tdots');
-    if (tdots?.parentNode) tdots.parentNode.insertBefore(el, tdots.nextSibling);
-  }
-  el.innerHTML = html;
-}
-
-function clearLoadingHint() {
-  document.getElementById('loading-hint')?.remove();
 }
 
 // ─── Visual renderers ─────────────────────────────────────────────────────────
@@ -1092,7 +1193,7 @@ function renderDecisionMatrix(options, criteria, title, desc) {
 
 function renderFlowDiagram(nodes, edges, title, desc) {
   // Render as a vertical flow with arrows for simple DAG-like structures.
-  // Build an adjacency order: start from nodes with no incoming edges.
+  // Build adjacency order: start from nodes with no incoming edges.
   const nodeMap = {};
   nodes.forEach(n => { nodeMap[n.id] = n.label || n.id; });
   const toIds = new Set(edges.map(e => e.to));
@@ -1121,7 +1222,7 @@ function renderFlowDiagram(nodes, edges, title, desc) {
 
 function renderBarChart(labels, datasets, title, desc) {
   if (!labels?.length || !datasets?.length) return null;
-  const ds = datasets[0];
+  const ds     = datasets[0];
   const values = (ds.values || []).map(Number).filter(v => isFinite(v));
   if (values.length < 2) return null;
 
@@ -1134,7 +1235,7 @@ function renderBarChart(labels, datasets, title, desc) {
   const bars = items.map((item, i) => {
     const y   = padT + i * (barH + gap);
     const bw  = max > 0 ? Math.max(4, Math.round((W - labelW - valW - 10) * item.val / max)) : 0;
-    const lbl = item.label.length > 20 ? item.label.slice(0, 18) + '…' : item.label;
+    const lbl = item.label.length > 20 ? item.label.slice(0, 18) + '\u2026' : item.label;
     const raw = item.val.toLocaleString();
     return `
       <text x="${labelW - 6}" y="${y + barH / 2 + 4}" text-anchor="end" fill="#9ca3af" font-size="11" font-family="system-ui,sans-serif">${esc(lbl)}</text>
@@ -1164,8 +1265,8 @@ function renderLineChart(labels, datasets, title, desc) {
 
   const allVals = datasets.flatMap(d => d.values || []).map(Number).filter(isFinite);
   if (allVals.length < 2) return null;
-  const minV = Math.min(...allVals);
-  const maxV = Math.max(...allVals);
+  const minV  = Math.min(...allVals);
+  const maxV  = Math.max(...allVals);
   const range = maxV - minV || 1;
 
   const colors = ['#f5a623', '#10b981', '#60a5fa', '#f87171'];
@@ -1179,12 +1280,17 @@ function renderLineChart(labels, datasets, title, desc) {
     return `<polyline points="${pts}" fill="none" stroke="${colors[di]}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
   }).join('');
 
-  // X-axis labels (max 6)
-  const step   = Math.max(1, Math.floor(labels.length / 6));
-  const xLabels = labels.filter((_, i) => i % step === 0 || i === labels.length - 1).map((l, i) => {
-    const idx = Math.min(i * step, labels.length - 1);
-    const x   = padL + (idx / Math.max(labels.length - 1, 1)) * innerW;
-    return `<text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="#6b7280" font-size="10" font-family="system-ui,sans-serif">${esc(String(l))}</text>`;
+  // ── X-axis labels (max 6, using actual array indices) ──────────────────
+  // BUG FIX: previous code computed x from `i * step` (a sequential counter)
+  // instead of the actual label index, causing mislabelled ticks when step > 1.
+  const step = Math.max(1, Math.floor(labels.length / 6));
+  const xIndices = [];
+  for (let i = 0; i < labels.length; i++) {
+    if (i % step === 0 || i === labels.length - 1) xIndices.push(i);
+  }
+  const xLabels = xIndices.map(idx => {
+    const x = padL + (idx / Math.max(labels.length - 1, 1)) * innerW;
+    return `<text x="${x.toFixed(1)}" y="${H - 8}" text-anchor="middle" fill="#6b7280" font-size="10" font-family="system-ui,sans-serif">${esc(String(labels[idx]))}</text>`;
   }).join('');
 
   // Y-axis labels (4 ticks)
@@ -1217,7 +1323,6 @@ function renderVisual(v) {
     return renderChecklistVisual(d.items, v.title, desc);
   }
   if (t === 'decision_matrix' && Array.isArray(d.criteria)) {
-    // Schema: { options: string[], criteria: { name, scores, weight? }[] }
     const opts = Array.isArray(d.options) ? d.options : [];
     return renderDecisionMatrix(opts, d.criteria, v.title, desc);
   }
@@ -1232,7 +1337,7 @@ function renderVisual(v) {
   if (t === 'flow_diagram' && Array.isArray(d.nodes)) {
     return renderFlowDiagram(d.nodes, d.edges || [], v.title, desc);
   }
-  // Graceful fallback — never dump raw JSON; show a readable table if possible
+  // Graceful fallback — never dump raw JSON; show a readable table if possible.
   const entries = Object.entries(d).filter(([, val]) => typeof val !== 'object' || val === null);
   if (entries.length > 0) {
     return renderTable(['Field', 'Value'], entries, '&#128203;', v.title, desc);
@@ -1317,10 +1422,10 @@ function renderChecklist(items) {
 function renderSources(sources) {
   if (!sources?.length) return '';
   const items = sources.map(s => {
-    const titleText  = s.title || s.source || 'Source';
-    const ref        = [s.source, s.tax_year ? 'Tax Year ' + s.tax_year : null].filter(Boolean).join(' · ');
-    const href       = safeUrl(s.url);
-    const link       = href
+    const titleText = s.title || s.source || 'Source';
+    const ref       = [s.source, s.tax_year ? 'Tax Year ' + s.tax_year : null].filter(Boolean).join(' · ');
+    const href      = safeUrl(s.url);
+    const link      = href
       ? `<a href="${esc(href)}" target="_blank" rel="noopener noreferrer" style="color:var(--gold);text-decoration:underline">${esc(titleText)}</a>`
       : `<span>${esc(titleText)}</span>`;
     return `<li class="source-item">
@@ -1344,7 +1449,6 @@ function buildWarningsHTML(warnings) {
 function buildReportHTML(r, warnings) {
   let html = '';
 
-  // Executive summary + confidence
   if (r.executive_summary) {
     html += `<div class="r-section">
       <div class="r-label">&#128203; Executive Summary${confidenceBadge(r.confidence_level)}</div>
@@ -1352,12 +1456,10 @@ function buildReportHTML(r, warnings) {
     </div>`;
   }
 
-  // Advisor takeaway — the single most important thing
   if (r.advisor_takeaway) {
     html += `<div class="takeaway-box">&#128161; <strong>Key Takeaway:</strong>&nbsp;${inlineFmt(r.advisor_takeaway)}</div>`;
   }
 
-  // Client profile
   if (r.client_profile) {
     html += `<div class="r-section">
       <div class="r-label">&#128100; Client Profile</div>
@@ -1365,14 +1467,10 @@ function buildReportHTML(r, warnings) {
     </div>`;
   }
 
-  // Planning priorities
   html += renderPlanningPriorities(r.planning_priorities);
-
-  // Opportunities & risks
   html += renderOpportunities(r.planning_opportunities);
   html += renderRisks(r.major_risks);
 
-  // Visuals (tables, charts, timelines…)
   if (Array.isArray(r.visuals)) {
     const visualsHTML = r.visuals.map(renderVisual).filter(Boolean).join('');
     if (visualsHTML) {
@@ -1380,7 +1478,6 @@ function buildReportHTML(r, warnings) {
     }
   }
 
-  // Detailed analysis
   if (r.detailed_analysis) {
     html += `<div class="r-section">
       <div class="r-label">&#128270; Detailed Analysis</div>
@@ -1388,13 +1485,9 @@ function buildReportHTML(r, warnings) {
     </div>`;
   }
 
-  // Checklist
   html += renderChecklist(r.advisor_checklist);
-
-  // Warnings (partial response)
   html += buildWarningsHTML(warnings);
 
-  // Disclaimer
   if (r.disclaimer) {
     html += `<div class="disclaimer-text">${inlineFmt(r.disclaimer)}</div>`;
   }
@@ -1407,10 +1500,10 @@ function buildReportHTML(r, warnings) {
 let msgId = 0;
 
 /**
- * Adds a message to the chat. `content` is either:
- *   { type: 'user', text: string }
- *   { type: 'reply', text: string }   — conversational AI response
- *   { type: 'report', report, warnings } — structured AI report
+ * Adds a message to the chat. content is either:
+ *   { type: 'user',   text: string }
+ *   { type: 'reply',  text: string }
+ *   { type: 'report', report, warnings }
  */
 function addMsg(content) {
   const msgs = document.getElementById('msgs');
@@ -1455,20 +1548,36 @@ function copyMsg(id, btn) {
   if (!el) return;
   const plain = el.innerText || el.textContent || '';
   navigator.clipboard.writeText(plain).then(() => {
-    btn.textContent = '✓ Copied';
+    btn.textContent = '\u2713 Copied';
     btn.classList.add('copied');
-    setTimeout(() => { btn.innerHTML = '&#128203; Copy'; btn.classList.remove('copied'); }, 2000);
+    setTimeout(() => {
+      btn.textContent = '';
+      // Recreate the copy icon safely without innerHTML assignment.
+      const icon = document.createTextNode('\uD83D\uDCCB Copy');
+      btn.appendChild(icon);
+      btn.classList.remove('copied');
+    }, 2_000);
   }).catch(() => showToast('Copy failed — select text manually.'));
 }
 
 function setTyping(on) {
+  const msgs = document.getElementById('msgs');
   document.getElementById('tdots').classList.toggle('on', on);
-  if (on) document.getElementById('msgs').scrollTop = document.getElementById('msgs').scrollHeight;
+  // aria-busy signals to screen readers that new content is loading.
+  msgs.setAttribute('aria-busy', String(on));
+  if (on) msgs.scrollTop = msgs.scrollHeight;
 }
 
 // ─── Conversation & send ──────────────────────────────────────────────────────
 
 let hist = [];
+
+/**
+ * Monotonically incrementing counter. Each call to send() captures its own
+ * value. If that value no longer matches the module-level counter when the
+ * response arrives, a newer send() superseded this one — discard the result.
+ */
+let _sendSeq = 0;
 
 async function send() {
   const inp = document.getElementById('mi');
@@ -1476,10 +1585,14 @@ async function send() {
   if (!raw) return;
 
   if (getRemaining() <= 0) { openUpgradeModal(); return; }
-  if (!RL.canSend()) { RL.showCooldown(); showToast('Too many requests — please wait a moment.'); return; }
+  if (!RL.canSend())        { RL.showCooldown(); showToast('Too many requests — please wait a moment.'); return; }
 
   const text = sanitize(raw);
   if (!text) return;
+
+  // Capture this send's sequence number before any await.
+  _sendSeq++;
+  const mySeq = _sendSeq;
 
   inp.value = '';
   inp.style.height = 'auto';
@@ -1492,11 +1605,19 @@ async function send() {
   sb.disabled = true;
   hist.push({ role: 'user', content: text });
 
+  // Trim history to stay within context window budget.
+  if (hist.length > MAX_HIST) hist.splice(0, hist.length - MAX_HIST);
+
   try {
     const result = await getAIResponse(hist, SYS);
+
+    // If another send() fired after us, our result is stale — drop it silently.
+    if (mySeq !== _sendSeq) return;
+
     setTyping(false);
 
-    // Build a concise history summary for multi-turn context (never include raw HTML/report JSON).
+    // Build a concise history summary for multi-turn context
+    // (never include raw HTML or the full report JSON).
     let historySummary;
     if (result.type === 'reply') {
       historySummary = result.text;
@@ -1506,26 +1627,40 @@ async function send() {
     }
     hist.push({ role: 'assistant', content: historySummary });
 
+    // Trim again after assistant turn.
+    if (hist.length > MAX_HIST) hist.splice(0, hist.length - MAX_HIST);
+
     addUsed();
     showUsageBar();
     addMsg(result);
-  } catch (err) {
-    setTyping(false);
-    const msg = classifyError(err);
-    showToast(msg);
-  }
 
-  sb.disabled = false;
-  inp.focus();
+  } catch (err) {
+    // If superseded, the CANCELLED error was already thrown by getAIResponse;
+    // also guard against the sequencing check above not running.
+    if (mySeq !== _sendSeq) return;
+
+    setTyping(false);
+    // CANCELLED = silently superseded; never surface this to the user.
+    if (err?.message === 'CANCELLED') return;
+    showToast(classifyError(err));
+
+  } finally {
+    // Only re-enable the button and restore focus when this is (still) the
+    // latest pending send. If superseded, the newer send() owns the button.
+    if (mySeq === _sendSeq) {
+      sb.disabled = false;
+      inp.focus();
+    }
+  }
 }
 
 /** Maps thrown error messages to user-facing guidance. */
 function classifyError(err) {
   const m = err?.message || '';
-  if (m === 'TIMEOUT') return 'Request timed out — the server took too long. Please try again.';
-  if (m === 'NETWORK') return 'Network error — check your connection and try again.';
+  if (m === 'TIMEOUT')      return 'Request timed out — the server took too long. Please try again.';
+  if (m === 'NETWORK')      return 'Network error — check your connection and try again.';
   if (m.startsWith('API:')) return 'Research service error — please try again shortly.';
-  if (m === 'INVALID') return 'Received an unexpected response — please try rephrasing your question.';
+  if (m === 'INVALID')      return 'Received an unexpected response — please try rephrasing your question.';
   return 'Something went wrong — please try again.';
 }
 
@@ -1537,13 +1672,25 @@ function showToast(msg, good) {
   el.textContent = msg;
   el.className = 'toast' + (good ? ' good' : '') + ' show';
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 4500);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 4_500);
 }
 
 // ─── Misc helpers ─────────────────────────────────────────────────────────────
 
 function bookDemo() { window.location.href = 'mailto:babar.wealthpilot@gmail.com?subject=WealthPilot%20Demo%20Request&body=Hi%2C%20I%27d%20like%20to%20book%20a%20free%2015-minute%20demo%20call.'; }
-const qs = (t) => { document.getElementById('mi').value = t; send(); };
+
+/**
+ * Populates the textarea and sends — respects all the same guards as a manual
+ * send (rate limiter, quota, in-flight cancellation). Does not bypass anything.
+ */
+function qs(t) {
+  const inp = document.getElementById('mi');
+  inp.value = t;
+  updateCharCount(inp);
+  ag(inp);
+  send();
+}
+
 const hk = (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
 const ag = (el) => { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 110) + 'px'; };
 
