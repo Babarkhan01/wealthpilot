@@ -594,7 +594,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 
 const AI_CONFIG = { endpoint: 'https://empty-block-1f07.babar-wealthpilot.workers.dev' };
 const ACCESS_DAYS  = 14;
-const ADMIN_PASS   = atob('WW91ciBOZXcgUGFzc3dvcmQxMjMh');
 const MAX_QUERY    = 500;
 /** Maximum messages retained in conversation history sent to the API. */
 const MAX_HIST     = 10;
@@ -608,22 +607,18 @@ const PLAN_CONFIG = {
   enterprise:   { limit: 9999, period: 'month', label: 'Enterprise' },
 };
 
-// System prompt — domain accuracy only; formatting enforced by worker schema.
+// System prompt — role, expertise, and formatting rules only. Domain reference
+// data (tax brackets, IRMAA thresholds, contribution limits, etc.) lives
+// exclusively in the worker's REFERENCE_DATA_2026 constant, which is the
+// single source of truth. This file used to carry its own hardcoded copy of
+// that data — it was stale (last year's figures under a "2026" label) and
+// created two competing "authoritative" sources in the same prompt, which is
+// the most likely root cause of past factual inconsistencies in reports.
 const SYS = `You are WealthPilot, an expert AI research assistant for fee-only Certified Financial Planners (CFPs) listed with NAPFA in the US.
-VERIFIED 2026 REFERENCE DATA (use these directly without searching):
-- IRMAA thresholds (Individual): ≤$106,000 = base; $106,001–$133,000 = Tier 1; $133,001–$167,000 = Tier 2; $167,001–$200,000 = Tier 3; $200,001–$500,000 = Tier 4; >$500,000 = Tier 5.
-- IRMAA thresholds (MFJ): ≤$212,000 = base; $212,001–$266,000 = Tier 1; $266,001–$334,000 = Tier 2; $334,001–$400,000 = Tier 3; $400,001–$750,000 = Tier 4; >$750,000 = Tier 5.
-- Medicare Part B 2026: $185.00/month base. IRMAA surcharges: Tier 1 +$74.00, Tier 2 +$185.00, Tier 3 +$295.90, Tier 4 +$406.90, Tier 5 +$443.90.
-- 401(k) 2026: $23,500 (under 50); $31,000 (age 50–59, 64+); $34,750 (age 60–63 super catch-up).
-- IRA 2026: $7,000 (under 50); $8,000 (age 50+).
-- Roth IRA phase-out 2026: Single $150,000–$165,000; MFJ $236,000–$246,000.
-- SS COLA 2026: 2.5% (applied January 2026).
-- RMD age: 73 under SECURE 2.0; age 75 for those born 1960 or later.
-- Standard deduction 2026: Single $15,000; MFJ $30,000.
 EXPERTISE: Roth conversions, IRMAA planning, Social Security timing, RMD rules (SECURE 2.0), tax-loss harvesting, backdoor Roth IRA, Medicare planning, retirement withdrawal sequencing, 401k/IRA/HSA rules, capital gains optimization, estate planning.
 CONTENT RULES:
 1. Populate authoritative_sources with the most specific reference available (IRS Publication, IRC section, SSA.gov, CMS.gov).
-2. Use exact dollar thresholds, percentages, and effective dates from the reference data above.
+2. Use the exact dollar thresholds, percentages, and effective dates provided to you in this system prompt's reference data section and in any locked computed facts — never substitute figures from your own training data, which may be out of date.
 3. Flag rules scheduled to change (e.g. TCJA sunset) inside major_risks or detailed_analysis.
 4. Put every table-shaped fact into the visuals array as a "table" — never inline as text.
 5. disclaimer must always remind the advisor to verify against current IRS guidance before client use.`;
@@ -722,6 +717,10 @@ function submitGate(e) {
   err.style.display = 'none';
   const user = { name, email, consent, ts: Date.now() };
   LS.set('wp_user', user);
+  // Local cache kept as a fallback / for this browser's own history; the
+  // admin dashboard now reads from the server (see renderAdminDash), not
+  // from this list, since localStorage only ever reflected the current
+  // visitor's own browser and never showed real cross-visitor signups.
   const leads = LS.get('wp_leads') || [];
   leads.push({ ...user, id: Date.now() });
   LS.set('wp_leads', leads);
@@ -729,6 +728,13 @@ function submitGate(e) {
     to_email: 'babar.wealthpilot@gmail.com', from_name: name, from_email: email,
     consent: consent ? 'Yes' : 'No', signup_time: new Date().toLocaleString(),
     message: 'New WealthPilot signup: ' + name + ' (' + email + ')',
+  }).catch(() => {});
+  // Persist the lead server-side (Cloudflare KV) so the admin dashboard can
+  // show real signups from any visitor's browser, not just the admin's own.
+  fetch(AI_CONFIG.endpoint + '/lead', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name, email, consent }),
   }).catch(() => {});
   enterApp();
 }
@@ -793,12 +799,12 @@ function showPrivacy() {
       <h2>3. AI Processing — Anthropic Claude</h2>
       <p>Queries are sent to Anthropic's API for processing under their Privacy Policy. <strong>Do not include client names, SSNs, or account numbers in queries.</strong> Use anonymised scenarios only.</p>
       <h2>4. Data storage</h2>
-      <p>Conversation history: browser memory only. Name/email: browser localStorage and EmailJS only. No server-side conversation database. Request deletion: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a></p>
+      <p>Conversation history: browser memory only. Name/email: stored securely to grant access and populate the admin leads dashboard. No client conversation database. Request deletion: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a></p>
       <h2>5. Your rights (GDPR & CCPA)</h2>
       <ul><li>Access, correction, deletion, portability of your data</li><li>Opt out of marketing at any time</li><li>We have not sold personal data to any third party</li></ul>
       <p>Contact: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a> — response within 30 days.</p>
       <h2>6. Security</h2>
-      <p>HTTPS encryption on all data in transit. API keys stored in Cloudflare Worker environment variables only — never in client-side code. Input sanitisation and rate limiting applied.</p>
+      <p>HTTPS encryption on all data in transit. API keys and admin credentials stored in Cloudflare Worker environment variables only — never in client-side code. Input sanitisation and rate limiting applied.</p>
       <h2>7. Changes</h2>
       <p>We will update the effective date when this policy changes. Continued use constitutes acceptance.</p>
     </div>
@@ -876,40 +882,89 @@ const cm = () => document.getElementById('mo').classList.remove('on');
 document.getElementById('mo').addEventListener('click', e => { if (e.target === document.getElementById('mo')) cm(); });
 
 // ─── Admin ────────────────────────────────────────────────────────────────────
+//
+// The admin password now lives only server-side, as a Cloudflare Worker
+// secret (env.ADMIN_PASSWORD). This file never contains or checks the
+// password itself — it just forwards what the user types to the worker's
+// /admin-auth endpoint and trusts its yes/no answer. That answer can't be
+// read out of page source the way the old base64 constant could.
 
 let adminAuthed = false;
+/**
+ * Cached only in memory for the lifetime of this tab, never persisted, so
+ * subsequent /leads requests during this admin session can authenticate
+ * without asking the admin to re-type the password on every render.
+ */
+let _adminPwCache = null;
 
-function adminLogin() {
+async function adminLogin() {
   const pw = document.getElementById('admin-pw').value;
-  if (pw === ADMIN_PASS) {
-    adminAuthed = true;
-    document.getElementById('admin-login').style.display = 'none';
-    document.getElementById('admin-dash').style.display = 'block';
-    renderAdminDash();
-  } else {
-    document.getElementById('admin-login-err').style.display = 'block';
-    document.getElementById('admin-pw').value = '';
-    document.getElementById('admin-pw').focus();
+  const errEl = document.getElementById('admin-login-err');
+  errEl.style.display = 'none';
+  try {
+    const res = await fetch(AI_CONFIG.endpoint + '/admin-auth', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password: pw }),
+    });
+    const data = await res.json();
+    if (data && data.ok) {
+      adminAuthed = true;
+      _adminPwCache = pw;
+      document.getElementById('admin-login').style.display = 'none';
+      document.getElementById('admin-dash').style.display = 'block';
+      renderAdminDash();
+    } else {
+      errEl.textContent = 'Incorrect password';
+      errEl.style.display = 'block';
+      document.getElementById('admin-pw').value = '';
+      document.getElementById('admin-pw').focus();
+    }
+  } catch (e) {
+    errEl.textContent = 'Could not reach the server — check your connection and try again.';
+    errEl.style.display = 'block';
   }
 }
 
 function adminLogout() {
   adminAuthed = false;
+  _adminPwCache = null;
   document.getElementById('admin-login').style.display = 'flex';
   document.getElementById('admin-dash').style.display = 'none';
   document.getElementById('admin-pw').value = '';
   document.getElementById('admin-login-err').style.display = 'none';
 }
 
-function renderAdminDash() {
-  const leads = LS.get('wp_leads') || [];
-  const now   = Date.now();
+async function renderAdminDash() {
+  const tbody = document.getElementById('admin-tbody');
+  tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">Loading leads…</td></tr>';
+
+  let leads = [];
+  try {
+    const res = await fetch(AI_CONFIG.endpoint + '/leads', {
+      headers: { 'x-admin-password': _adminPwCache || '' },
+    });
+    const data = await res.json();
+    if (data && data.ok) {
+      leads = data.leads || [];
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6" class="admin-empty">Could not load leads: ${esc(data?.error || 'unknown error')}</td></tr>`;
+      document.getElementById('admin-stats').innerHTML = '';
+      return;
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">Could not reach the server — check your connection and try again.</td></tr>';
+    document.getElementById('admin-stats').innerHTML = '';
+    return;
+  }
+
+  const now = Date.now();
   const active = leads.filter(l => (now - l.ts) < ACCESS_DAYS * 86_400_000).length;
   document.getElementById('admin-stats').innerHTML =
     `<div class="stat-box"><div class="stat-val">${leads.length}</div><div class="stat-lbl">Total signups</div></div>` +
     `<div class="stat-box"><div class="stat-val">${active}</div><div class="stat-lbl">Active (in trial)</div></div>` +
     `<div class="stat-box"><div class="stat-val">${leads.filter(l => l.consent).length}</div><div class="stat-lbl">Consented</div></div>`;
-  const tbody = document.getElementById('admin-tbody');
+
   if (!leads.length) { tbody.innerHTML = '<tr><td colspan="6" class="admin-empty">No leads yet.</td></tr>'; return; }
   tbody.innerHTML = [...leads].reverse().map((l, i) => {
     const d   = new Date(l.ts);
