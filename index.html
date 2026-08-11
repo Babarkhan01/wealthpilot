@@ -597,8 +597,8 @@ const ACCESS_DAYS  = 14;
 const MAX_QUERY    = 500;
 /** Maximum messages retained in conversation history sent to the API. */
 const MAX_HIST     = 10;
-/** Request timeout in milliseconds (2 minutes). */
-const REQUEST_TIMEOUT_MS = 120_000;
+/** Request timeout in milliseconds (3 minutes — raised from 2 minutes to accommodate the worker's complexity-aware report generation, which can run up to 8,000 tokens for multi-domain questions like combined IRMAA + Roth conversion + Social Security + RMD scenarios). */
+const REQUEST_TIMEOUT_MS = 180_000;
 
 const PLAN_CONFIG = {
   free:         { limit: 5,    period: 'total', label: 'Free Trial' },
@@ -1021,12 +1021,15 @@ function inlineFmt(text) {
 // preventing ghost hints after an aborted or superseded request.
 
 // Separate hint stages per mode.
-// Report mode: three progressive hints that match the ~20-40s generation time.
+// Report mode: progressive hints matching generation time, including a final
+// stage for the complexity-aware ~1-2 minute path (multi-domain questions
+// that trigger the worker's raised 8,000-token ceiling).
 // Chat mode:   a single soft hint that fires only if Haiku takes unusually long.
 const _reportHintStages = [
   { ms:  3_000, text: '&#x270D; Composing research analysis...' },
   { ms: 10_000, text: '&#x1F4CA; Building tables and citations...' },
   { ms: 28_000, text: '&#x231B; Finalizing structured report...' },
+  { ms: 60_000, text: '&#x1F50D; Complex multi-topic question — running extra consistency checks...' },
 ];
 const _chatHintStages = [
   { ms: 3_000, text: '&#x1F4AC; Thinking...' },
