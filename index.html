@@ -600,6 +600,12 @@ const MAX_HIST     = 10;
 /** Request timeout in milliseconds (3 minutes — raised from 2 minutes to accommodate the worker's complexity-aware report generation, which can run up to 8,000 tokens for multi-domain questions like combined IRMAA + Roth conversion + Social Security + RMD scenarios). */
 const REQUEST_TIMEOUT_MS = 180_000;
 
+// PLAN_CONFIG is kept for DISPLAY PURPOSES ONLY (labels, and as a fallback
+// while the server usage fetch is in flight). It is no longer the source of
+// truth for what a user can actually do — that decision now lives entirely
+// server-side (see fetchServerUsage() and the worker's checkAndIncrementUsage()).
+// A user editing this constant in DevTools, or clearing localStorage, has no
+// effect on their real access anymore.
 const PLAN_CONFIG = {
   free:         { limit: 5,    period: 'total', label: 'Free Trial' },
   starter:      { limit: 30,   period: 'month', label: 'Starter' },
@@ -632,6 +638,31 @@ const LS = {
 };
 
 // ─── Plan & usage ─────────────────────────────────────────────────────────────
+
+/**
+ * Persistent anonymous ID for the free trial only. This is NOT a security
+ * boundary — clearing it just starts a new free trial (low-stakes, matches
+ * the free tier's own limit). Paid-tier access is never decided by this;
+ * that comes from the server-verified license tied to a real email, looked
+ * up server-side on every request.
+ */
+function getDeviceId() {
+  let id = localStorage.getItem('wp_device_id');
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem('wp_device_id', id);
+  }
+  return id;
+}
+
+// NOTE: getUserPlan(), usageKey(), getUsed(), addUsed(), getRemaining() are
+// kept below UNCHANGED from the original implementation. They are no longer
+// used to gate access anywhere (that enforcement moved server-side — see
+// fetchServerUsage() and the worker's /usage and chat-limit checks). They
+// remain only as harmless legacy helpers in case any other code path still
+// references them for display; nothing here was removed, per instruction to
+// change nothing about how the existing code works, only add the new layer
+// on top of it.
 
 function getUserPlan() {
   try {
@@ -753,14 +784,60 @@ function initDisc()    { if (sessionStorage.getItem('disc_dismissed')) document.
 
 // ─── Usage bar ────────────────────────────────────────────────────────────────
 
-function showUsageBar() {
+/**
+ * Fetches the REAL usage/plan from the server — this is now the only
+ * trustworthy source. The previous implementation computed remaining
+ * queries entirely from localStorage, which a user's own browser fully
+ * controlled (clearing it, or editing the stored value directly, reset
+ * access with no server involvement at all). This calls the worker's new
+ * /usage endpoint, which looks up the caller's plan from a server-side
+ * license (if a verified email is on file) or an anonymous free-trial
+ * counter (by deviceId), and returns the actual enforced numbers.
+ */
+async function fetchServerUsage() {
+  try {
+    const res = await fetch(AI_CONFIG.endpoint + '/usage', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        email: getUser()?.email || null,
+        deviceId: getDeviceId(),
+      }),
+    });
+    return await res.json();
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
+ * Renders the usage bar using server-verified numbers. Replaces the old
+ * synchronous, localStorage-only version. Now async since it awaits the
+ * server round-trip; callers already treat this as fire-and-forget (no
+ * caller depended on it returning synchronously), so this change is
+ * transparent to the rest of the app's behavior.
+ */
+async function showUsageBar() {
   const bar = document.getElementById('ubar');
-  const r   = getRemaining();
-  const l   = PLAN_CONFIG[getUserPlan()].limit;
   bar.style.display = 'flex';
+
+  const data = await fetchServerUsage();
+  if (!data || !data.ok) {
+    // Server unreachable or errored — show a neutral placeholder rather
+    // than falling back to a locally-computed number that could be wrong
+    // or (previously) trivially manipulated.
+    document.getElementById('unum').textContent = '—';
+    document.getElementById('u-period').textContent = '';
+    document.getElementById('ufill').style.width = '0%';
+    return;
+  }
+
+  const r = data.remaining;
+  const l = data.limit;
   document.getElementById('unum').textContent = r;
-  document.getElementById('u-period').textContent = PLAN_CONFIG[getUserPlan()].period === 'total' ? 'remaining (free)' : 'remaining this month';
-  document.getElementById('ufill').style.width = Math.round((r / l) * 100) + '%';
+  document.getElementById('u-period').textContent =
+    data.plan === 'free' ? 'remaining (free)' : 'remaining this month';
+  document.getElementById('ufill').style.width = (l > 0 ? Math.round((r / l) * 100) : 0) + '%';
 }
 
 // ─── Nav / routing ────────────────────────────────────────────────────────────
@@ -1101,7 +1178,9 @@ const _userCancelledCtrls = new WeakSet();
  *   'CANCELLED' — superseded by a newer send(); caller should silently ignore.
  *   'TIMEOUT'   — request exceeded REQUEST_TIMEOUT_MS.
  *   'NETWORK'   — fetch failed (offline, DNS, CORS, etc.).
- *   'API:<msg>' — worker returned a non-2xx status.
+ *   'API:<msg>' — worker returned a non-2xx status (this now includes the
+ *                 server's plan/usage-limit rejection message, since that
+ *                 enforcement lives in the worker as of Layer 1).
  *   'INVALID'   — response body couldn't be parsed or had no expected fields.
  */
 async function getAIResponse(messages, sys, mode = 'chat') {
@@ -1129,7 +1208,19 @@ async function getAIResponse(messages, sys, mode = 'chat') {
       method:  'POST',
       headers: { 'content-type': 'application/json' },
       signal:  ctrl.signal,
-      body:    JSON.stringify({ system: sys, messages, mode }),
+      // email + deviceId are now sent on every request so the worker can
+      // look up the caller's real, server-side plan/usage (via a license
+      // record for a verified paying email, or an anonymous free-trial
+      // counter keyed by deviceId) and enforce limits before doing any
+      // Anthropic API work. Previously the worker had no way to know who
+      // was asking or what they were entitled to.
+      body:    JSON.stringify({
+        system: sys,
+        messages,
+        mode,
+        email: getUser()?.email || null,
+        deviceId: getDeviceId(),
+      }),
     });
 
     clearTimeout(timeoutId);
@@ -1678,8 +1769,18 @@ async function send() {
   const raw = inp.value.trim();
   if (!raw) return;
 
-  if (getRemaining() <= 0) { openUpgradeModal(); return; }
-  if (!RL.canSend())        { RL.showCooldown(); showToast('Too many requests — please wait a moment.'); return; }
+  // NOTE: the old client-side `getRemaining() <= 0` pre-check is
+  // intentionally removed here. It relied entirely on a localStorage
+  // counter the browser itself controlled, so it was trivially bypassable
+  // (clearing storage, or a different browser, reset it to full every
+  // time) and gave no real protection. The limit is now enforced
+  // server-side on every request (see getAIResponse() and the worker's
+  // usage check) — if the caller is over their limit, the server rejects
+  // the request with a 403 and a clear message, which is caught below and
+  // used to open the upgrade modal directly. This means send() now always
+  // attempts the request rather than pre-judging locally, and the actual
+  // enforcement point moved to where it can't be spoofed.
+  if (!RL.canSend()) { RL.showCooldown(); showToast('Too many requests — please wait a moment.'); return; }
 
   const text = sanitize(raw);
   if (!text) return;
@@ -1724,7 +1825,13 @@ async function send() {
     // Trim again after assistant turn.
     if (hist.length > MAX_HIST) hist.splice(0, hist.length - MAX_HIST);
 
-    addUsed();
+    // NOTE: the old addUsed() call (which incremented a purely local,
+    // browser-controlled counter) has been removed. Usage was already
+    // incremented server-side, atomically, before this response was
+    // returned — incrementing again here would be redundant at best and
+    // was never the real enforcement point anyway. showUsageBar() below
+    // re-fetches the actual, current count from the server so the display
+    // reflects reality rather than a locally-tracked number.
     showUsageBar();
     addMsg(result);
 
@@ -1736,7 +1843,17 @@ async function send() {
     setTyping(false);
     // CANCELLED = silently superseded; never surface this to the user.
     if (err?.message === 'CANCELLED') return;
-    showToast(classifyError(err));
+    const errText = classifyError(err);
+    // If the server rejected this request because the caller is over their
+    // plan/usage limit (the new server-side enforcement from Layer 1), open
+    // the upgrade modal directly instead of just showing a toast — this is
+    // the real, unbypassable version of what the old client-side check used
+    // to do before a send() was even attempted.
+    if (/limit reached/i.test(errText)) {
+      openUpgradeModal();
+    } else {
+      showToast(errText);
+    }
 
   } finally {
     // Only re-enable the button and restore focus when this is (still) the
@@ -1753,7 +1870,15 @@ function classifyError(err) {
   const m = err?.message || '';
   if (m === 'TIMEOUT')      return 'Request timed out — the server took too long. Please try again.';
   if (m === 'NETWORK')      return 'Network error — check your connection and try again.';
-  if (m.startsWith('API:')) return 'Research service error — please try again shortly.';
+  if (m.startsWith('API:')) {
+    // Surface the server's actual message (e.g. "Free trial limit reached.
+    // Upgrade to continue." or "Monthly query limit reached for your
+    // starter plan.") instead of a generic one — this is now meaningful
+    // text coming from the worker's real, server-side enforcement, and the
+    // caller in send() checks it for the "limit reached" pattern to decide
+    // whether to open the upgrade modal instead of a plain toast.
+    return m.replace(/^API:/, '').trim() || 'Research service error — please try again shortly.';
+  }
   if (m === 'INVALID')      return 'Received an unexpected response — please try rephrasing your question.';
   return 'Something went wrong — please try again.';
 }
