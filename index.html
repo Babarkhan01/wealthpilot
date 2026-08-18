@@ -597,7 +597,9 @@ const ACCESS_DAYS  = 14;
 const MAX_QUERY    = 500;
 /** Maximum messages retained in conversation history sent to the API. */
 const MAX_HIST     = 10;
-/** Request timeout in milliseconds (3 minutes — raised from 2 minutes to accommodate the worker's complexity-aware report generation, which can run up to 8,000 tokens for multi-domain questions like combined IRMAA + Roth conversion + Social Security + RMD scenarios). */
+/** Keep the rendered DOM bounded so 30–50 reports do not degrade the tab. */
+const MAX_RENDERED_MESSAGES = 80;
+/** Request timeout in milliseconds. */
 const REQUEST_TIMEOUT_MS = 180_000;
 
 // PLAN_CONFIG is kept for DISPLAY PURPOSES ONLY (labels, and as a fallback
@@ -653,6 +655,13 @@ function getDeviceId() {
     localStorage.setItem('wp_device_id', id);
   }
   return id;
+}
+
+function getLicenseToken() {
+  try {
+    const token = sessionStorage.getItem('wp_license_token');
+    return token && token.length <= 512 ? token : null;
+  } catch { return null; }
 }
 
 // NOTE: getUserPlan(), usageKey(), getUsed(), addUsed(), getRemaining() are
@@ -802,6 +811,7 @@ async function fetchServerUsage() {
       body: JSON.stringify({
         email: getUser()?.email || null,
         deviceId: getDeviceId(),
+        licenseToken: getLicenseToken(),
       }),
     });
     return await res.json();
@@ -869,14 +879,14 @@ function showPrivacy() {
     <div class="legal-content">
       <div class="legal-highlight"><p>&#128274; <strong>Short version:</strong> WealthPilot collects only your name and email. We never store client financial data. We never sell your information.</p></div>
       <h2>1. What we collect</h2>
-      <p>Name and email address (signup only), consent confirmation, usage counters (browser only, never transmitted), session conversation history (browser memory only, cleared on page close).</p>
+      <p>Name and email address (signup and access lookup), consent confirmation, a pseudonymous device identifier, server-side usage counters, and session conversation history (browser memory only, cleared on page close).</p>
       <p><strong>We do not collect</strong> client names, SSNs, account numbers, or any third-party personal data.</p>
       <h2>2. How we use it</h2>
       <ul><li>To grant and manage your access</li><li>To send product updates (if you consented)</li><li>To respond to support requests</li></ul>
       <h2>3. AI Processing — Anthropic Claude</h2>
       <p>Queries are sent to Anthropic's API for processing under their Privacy Policy. <strong>Do not include client names, SSNs, or account numbers in queries.</strong> Use anonymised scenarios only.</p>
       <h2>4. Data storage</h2>
-      <p>Conversation history: browser memory only. Name/email: stored securely to grant access and populate the admin leads dashboard. No client conversation database. Request deletion: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a></p>
+      <p>Conversation history: browser memory only. Name/email: stored securely to grant access and populate the admin leads dashboard. Device-based usage identifiers and usage counters are processed server-side for quota enforcement. No client conversation database. Request deletion: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a></p>
       <h2>5. Your rights (GDPR & CCPA)</h2>
       <ul><li>Access, correction, deletion, portability of your data</li><li>Opt out of marketing at any time</li><li>We have not sold personal data to any third party</li></ul>
       <p>Contact: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a> — response within 30 days.</p>
@@ -1193,6 +1203,7 @@ async function getAIResponse(messages, sys, mode = 'chat') {
   }
 
   const ctrl = new AbortController();
+  const requestId = crypto.randomUUID();
   _currentCtrl = ctrl;
 
   const timeoutId = setTimeout(() => {
@@ -1206,7 +1217,7 @@ async function getAIResponse(messages, sys, mode = 'chat') {
   try {
     const res = await fetch(AI_CONFIG.endpoint, {
       method:  'POST',
-      headers: { 'content-type': 'application/json' },
+      headers: { 'content-type': 'application/json', 'x-request-id': requestId },
       signal:  ctrl.signal,
       // email + deviceId are now sent on every request so the worker can
       // look up the caller's real, server-side plan/usage (via a license
@@ -1220,6 +1231,8 @@ async function getAIResponse(messages, sys, mode = 'chat') {
         mode,
         email: getUser()?.email || null,
         deviceId: getDeviceId(),
+        licenseToken: getLicenseToken(),
+        requestId,
       }),
     });
 
@@ -1232,7 +1245,9 @@ async function getAIResponse(messages, sys, mode = 'chat') {
     try { data = await res.json(); } catch { throw new Error('INVALID'); }
 
     if (!res.ok) {
-      throw new Error('API:' + (data?.error?.message || 'HTTP ' + res.status));
+      const code = data?.error?.code || 'HTTP_ERROR';
+      const message = data?.error?.message || 'HTTP ' + res.status;
+      throw new Error(`API:${code}:${message}`);
     }
 
     // Conversational reply
@@ -1626,6 +1641,15 @@ function buildReportHTML(r, warnings) {
     html += `<div class="takeaway-box">&#128161; <strong>Key Takeaway:</strong>&nbsp;${inlineFmt(r.advisor_takeaway)}</div>`;
   }
 
+  if (r.decision_summary) {
+    html += `<div class="ai-callout neutral"><div class="callout-title">Decision Summary</div><div class="callout-body">${inlineFmt(r.decision_summary)}</div></div>`;
+  }
+
+  if (Array.isArray(r.assumptions_and_gaps) && r.assumptions_and_gaps.length) {
+    const gapRows = r.assumptions_and_gaps.slice(0, 12).map(g => `<li class="checklist-item"><span class="checklist-dot">!</span><span class="checklist-action">${inlineFmt(g)}</span></li>`).join('');
+    html += `<div class="ai-callout gold"><div class="callout-title">Assumptions &amp; Data Gaps</div><ul class="checklist-items">${gapRows}</ul></div>`;
+  }
+
   if (r.client_profile) {
     html += `<div class="r-section">
       <div class="r-label">&#128100; Client Profile</div>
@@ -1671,6 +1695,15 @@ let msgId = 0;
  *   { type: 'reply',  text: string }
  *   { type: 'report', report, warnings }
  */
+function pruneRenderedMessages() {
+  const msgs = document.getElementById('msgs');
+  if (!msgs) return;
+  const rendered = [...msgs.querySelectorAll(':scope > .msg')];
+  const excess = rendered.length - MAX_RENDERED_MESSAGES;
+  if (excess <= 0) return;
+  for (let i = 0; i < excess; i += 1) rendered[i].remove();
+}
+
 function addMsg(content) {
   const msgs = document.getElementById('msgs');
   const td   = document.getElementById('tdots');
@@ -1706,6 +1739,7 @@ function addMsg(content) {
   }
 
   msgs.insertBefore(wrap, td);
+  pruneRenderedMessages();
   msgs.scrollTop = msgs.scrollHeight;
 }
 
@@ -1763,11 +1797,16 @@ let hist = [];
  * response arrives, a newer send() superseded this one — discard the result.
  */
 let _sendSeq = 0;
+let _requestInFlight = false;
 
 async function send() {
   const inp = document.getElementById('mi');
   const raw = inp.value.trim();
   if (!raw) return;
+  if (_requestInFlight) {
+    showToast('A research request is still running. Please wait for it to finish.');
+    return;
+  }
 
   // NOTE: the old client-side `getRemaining() <= 0` pre-check is
   // intentionally removed here. It relied entirely on a localStorage
@@ -1788,6 +1827,7 @@ async function send() {
   // Capture this send's sequence number before any await.
   _sendSeq++;
   const mySeq = _sendSeq;
+  _requestInFlight = true;
 
   inp.value = '';
   inp.style.height = 'auto';
@@ -1806,7 +1846,6 @@ async function send() {
   try {
     const result = await getAIResponse(hist, SYS, _mode);
 
-    // If another send() fired after us, our result is stale — drop it silently.
     if (mySeq !== _sendSeq) return;
 
     setTyping(false);
@@ -1841,8 +1880,9 @@ async function send() {
     if (mySeq !== _sendSeq) return;
 
     setTyping(false);
-    // CANCELLED = silently superseded; never surface this to the user.
     if (err?.message === 'CANCELLED') return;
+    // Do not leave an unanswered user turn in the bounded model context.
+    if (hist[hist.length - 1]?.role === 'user' && hist[hist.length - 1]?.content === text) hist.pop();
     const errText = classifyError(err);
     // If the server rejected this request because the caller is over their
     // plan/usage limit (the new server-side enforcement from Layer 1), open
@@ -1859,6 +1899,7 @@ async function send() {
     // Only re-enable the button and restore focus when this is (still) the
     // latest pending send. If superseded, the newer send() owns the button.
     if (mySeq === _sendSeq) {
+      _requestInFlight = false;
       sb.disabled = false;
       inp.focus();
     }
@@ -1871,13 +1912,15 @@ function classifyError(err) {
   if (m === 'TIMEOUT')      return 'Request timed out — the server took too long. Please try again.';
   if (m === 'NETWORK')      return 'Network error — check your connection and try again.';
   if (m.startsWith('API:')) {
-    // Surface the server's actual message (e.g. "Free trial limit reached.
-    // Upgrade to continue." or "Monthly query limit reached for your
-    // starter plan.") instead of a generic one — this is now meaningful
-    // text coming from the worker's real, server-side enforcement, and the
-    // caller in send() checks it for the "limit reached" pattern to decide
-    // whether to open the upgrade modal instead of a plain toast.
-    return m.replace(/^API:/, '').trim() || 'Research service error — please try again shortly.';
+    const parts = m.split(':');
+    const code = parts[1] || 'HTTP_ERROR';
+    const text = parts.slice(2).join(':').trim();
+    if (code === 'USAGE_LIMIT_REACHED') return text || 'Usage limit reached.';
+    if (code === 'DUPLICATE_REQUEST') return 'This request was already accepted. Please submit a new request if another run is needed.';
+    if (code === 'USAGE_STORE_UNAVAILABLE') return 'Usage enforcement is temporarily unavailable. Please try again shortly.';
+    if (code === 'UPSTREAM_RATE_LIMIT') return 'The research service is temporarily rate limited. Please try again shortly.';
+    if (code === 'UPSTREAM_OVERLOADED') return 'The research service is temporarily overloaded. Please try again shortly.';
+    return text || 'Research service error — please try again shortly.';
   }
   if (m === 'INVALID')      return 'Received an unexpected response — please try rephrasing your question.';
   return 'Something went wrong — please try again.';
