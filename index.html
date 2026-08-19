@@ -1626,8 +1626,12 @@ function buildWarningsHTML(warnings) {
 function buildQualityHTML(quality) {
   if (!quality || typeof quality !== 'object') return '';
   const ready = quality.clientReady === true && quality.status === 'client_ready_draft';
+  const general = quality.status === 'general_education' || quality.scope === 'general_education';
   const score = Number.isFinite(Number(quality.score)) ? Math.max(0, Math.min(100, Number(quality.score))) : 0;
   const issues = Array.isArray(quality.issues) ? quality.issues.slice(0, 6) : [];
+  if (general) {
+    return `<div class="ai-callout gold"><div class="callout-title">General Educational Report · Quality ${score}/100</div><div class="callout-body">This report contains no verified client-specific scenario. Use it as advisor research support, not as a final client recommendation. Add and verify client facts before delivery.</div>${issues.length ? `<ul class="checklist-items">${issues.slice(0, 4).map(issue => `<li class="checklist-item"><span class="checklist-dot">!</span><span class="checklist-action">${esc(issue)}</span></li>`).join('')}</ul>` : ''}</div>`;
+  }
   if (ready && score >= 95) {
     return `<div class="ai-callout green"><div class="callout-title">Client-Ready Draft · Quality ${score}/100</div><div class="callout-body">The server completed deterministic consistency and source checks. The advisor must still verify client-specific facts before delivery.</div></div>`;
   }
