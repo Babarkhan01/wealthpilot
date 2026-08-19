@@ -1623,12 +1623,26 @@ function buildWarningsHTML(warnings) {
   return `<div class="warnings-box">&#9888; Partial response: ${warnings.map(esc).join('; ')}</div>`;
 }
 
+function buildQualityHTML(quality) {
+  if (!quality || typeof quality !== 'object') return '';
+  const ready = quality.clientReady === true && quality.status === 'client_ready_draft';
+  const score = Number.isFinite(Number(quality.score)) ? Math.max(0, Math.min(100, Number(quality.score))) : 0;
+  const issues = Array.isArray(quality.issues) ? quality.issues.slice(0, 6) : [];
+  if (ready && score >= 95) {
+    return `<div class="ai-callout green"><div class="callout-title">Client-Ready Draft · Quality ${score}/100</div><div class="callout-body">The server completed deterministic consistency and source checks. The advisor must still verify client-specific facts before delivery.</div></div>`;
+  }
+  const issueHTML = issues.length ? `<ul class="checklist-items">${issues.map(issue => `<li class="checklist-item"><span class="checklist-dot">!</span><span class="checklist-action">${esc(issue)}</span></li>`).join('')}</ul>` : '';
+  return `<div class="ai-callout red"><div class="callout-title">Advisor Review Required · Quality ${score}/100</div><div class="callout-body">Do not deliver this report as final client advice until the listed issues and client-specific assumptions are verified.</div>${issueHTML}</div>`;
+}
+
 /**
  * Builds the full report HTML from the structured report object.
  * Sections render in a logical advisor reading order.
  */
 function buildReportHTML(r, warnings) {
   let html = '';
+
+  html += buildQualityHTML(r.quality);
 
   if (r.executive_summary) {
     html += `<div class="r-section">
