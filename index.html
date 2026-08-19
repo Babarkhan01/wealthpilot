@@ -664,33 +664,12 @@ function getLicenseToken() {
   } catch { return null; }
 }
 
-// NOTE: getUserPlan(), usageKey(), getUsed(), addUsed(), getRemaining() are
-// kept below UNCHANGED from the original implementation. They are no longer
-// used to gate access anywhere (that enforcement moved server-side — see
-// fetchServerUsage() and the worker's /usage and chat-limit checks). They
-// remain only as harmless legacy helpers in case any other code path still
-// references them for display; nothing here was removed, per instruction to
-// change nothing about how the existing code works, only add the new layer
-// on top of it.
-
+// The server is the only authority for plan and usage. This value is display-only
+// and is updated only from the Worker /usage response; it cannot grant access.
+let _serverUsagePlan = 'free';
 function getUserPlan() {
-  try {
-    const u = new URLSearchParams(window.location.search).get('plan');
-    if (u && PLAN_CONFIG[u]) { localStorage.setItem('wp_plan', u); return u; }
-    const s = localStorage.getItem('wp_plan');
-    if (s && PLAN_CONFIG[s]) return s;
-  } catch {}
-  return 'free';
+  return PLAN_CONFIG[_serverUsagePlan] ? _serverUsagePlan : 'free';
 }
-
-const usageKey = () =>
-  PLAN_CONFIG[getUserPlan()].period === 'total'
-    ? 'wp_u_lifetime'
-    : 'wp_u_' + new Date().getFullYear() + '_' + new Date().getMonth();
-
-const getUsed      = () => parseInt(localStorage.getItem(usageKey()) || '0', 10);
-const addUsed      = () => localStorage.setItem(usageKey(), getUsed() + 1);
-const getRemaining = () => Math.max(0, PLAN_CONFIG[getUserPlan()].limit - getUsed());
 
 // ─── Rate limiter ─────────────────────────────────────────────────────────────
 
@@ -827,27 +806,43 @@ async function fetchServerUsage() {
  * caller depended on it returning synchronously), so this change is
  * transparent to the rest of the app's behavior.
  */
+let _usageFetchInFlight = null;
+let _usageRefreshQueued = false;
+
 async function showUsageBar() {
   const bar = document.getElementById('ubar');
   bar.style.display = 'flex';
-
-  const data = await fetchServerUsage();
-  if (!data || !data.ok) {
-    // Server unreachable or errored — show a neutral placeholder rather
-    // than falling back to a locally-computed number that could be wrong
-    // or (previously) trivially manipulated.
-    document.getElementById('unum').textContent = '—';
-    document.getElementById('u-period').textContent = '';
-    document.getElementById('ufill').style.width = '0%';
-    return;
+  if (_usageFetchInFlight) {
+    _usageRefreshQueued = true;
+    return _usageFetchInFlight;
   }
 
-  const r = data.remaining;
-  const l = data.limit;
-  document.getElementById('unum').textContent = r;
-  document.getElementById('u-period').textContent =
-    data.plan === 'free' ? 'remaining (free)' : 'remaining this month';
-  document.getElementById('ufill').style.width = (l > 0 ? Math.round((r / l) * 100) : 0) + '%';
+  _usageFetchInFlight = (async () => {
+    const data = await fetchServerUsage();
+    if (!data || !data.ok) {
+      document.getElementById('unum').textContent = '—';
+      document.getElementById('u-period').textContent = '';
+      document.getElementById('ufill').style.width = '0%';
+      return;
+    }
+
+    _serverUsagePlan = PLAN_CONFIG[data.plan] ? data.plan : 'free';
+    const r = Number.isFinite(Number(data.remaining)) ? Number(data.remaining) : 0;
+    const l = Number.isFinite(Number(data.limit)) && Number(data.limit) > 0 ? Number(data.limit) : 1;
+    document.getElementById('unum').textContent = r;
+    document.getElementById('u-period').textContent = data.plan === 'free' ? 'remaining (free)' : 'remaining this month';
+    document.getElementById('ufill').style.width = Math.max(0, Math.min(100, Math.round((r / l) * 100))) + '%';
+  })();
+
+  try {
+    return await _usageFetchInFlight;
+  } finally {
+    _usageFetchInFlight = null;
+    if (_usageRefreshQueued) {
+      _usageRefreshQueued = false;
+      setTimeout(() => { showUsageBar(); }, 0);
+    }
+  }
 }
 
 // ─── Nav / routing ────────────────────────────────────────────────────────────
@@ -877,7 +872,7 @@ function showPrivacy() {
     <div class="m-title">&#128274; Privacy Policy</div>
     <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Effective: June 15, 2026</p>
     <div class="legal-content">
-      <div class="legal-highlight"><p>&#128274; <strong>Short version:</strong> WealthPilot collects only your name and email. We never store client financial data. We never sell your information.</p></div>
+      <div class="legal-highlight"><p>&#128274; <strong>Short version:</strong> WealthPilot collects your name and email for access and support, plus a pseudonymous device identifier for server-side usage enforcement. We do not store client financial data in the conversation database. We never sell your information.</p></div>
       <h2>1. What we collect</h2>
       <p>Name and email address (signup and access lookup), consent confirmation, a pseudonymous device identifier, server-side usage counters, and session conversation history (browser memory only, cleared on page close).</p>
       <p><strong>We do not collect</strong> client names, SSNs, account numbers, or any third-party personal data.</p>
@@ -1488,6 +1483,11 @@ function renderLineChart(labels, datasets, title, desc) {
   return artifactWrap('&#128200;', title, `<div class="artifact-chart">${svg}</div>`, desc, true);
 }
 
+function isUnsafeIrmaaVisual(v) {
+  const text = JSON.stringify(v || '');
+  return /two[- ]year\s+cost.*(?:2|two)\s+(?:people|persons)|(?:2|two)\s+(?:people|persons).*two[- ]year\s+cost/i.test(text);
+}
+
 function renderVisual(v) {
   if (!v?.type || !v.data) return '';
   const t    = v.type;
@@ -1662,7 +1662,7 @@ function buildReportHTML(r, warnings) {
   html += renderRisks(r.major_risks);
 
   if (Array.isArray(r.visuals)) {
-    const visualsHTML = r.visuals.map(renderVisual).filter(Boolean).join('');
+    const visualsHTML = r.visuals.filter(v => !isUnsafeIrmaaVisual(v)).slice(0, 5).map(renderVisual).filter(Boolean).join('');
     if (visualsHTML) {
       html += `<div class="r-section"><div class="r-label">&#128202; Data &amp; Visuals</div>${visualsHTML}</div>`;
     }
@@ -1808,17 +1808,8 @@ async function send() {
     return;
   }
 
-  // NOTE: the old client-side `getRemaining() <= 0` pre-check is
-  // intentionally removed here. It relied entirely on a localStorage
-  // counter the browser itself controlled, so it was trivially bypassable
-  // (clearing storage, or a different browser, reset it to full every
-  // time) and gave no real protection. The limit is now enforced
-  // server-side on every request (see getAIResponse() and the worker's
-  // usage check) — if the caller is over their limit, the server rejects
-  // the request with a 403 and a clear message, which is caught below and
-  // used to open the upgrade modal directly. This means send() now always
-  // attempts the request rather than pre-judging locally, and the actual
-  // enforcement point moved to where it can't be spoofed.
+  // The request is always checked by the Worker. The browser does not
+  // pre-authorize or deny access from client-controlled state.
   if (!RL.canSend()) { RL.showCooldown(); showToast('Too many requests — please wait a moment.'); return; }
 
   const text = sanitize(raw);
@@ -1864,13 +1855,8 @@ async function send() {
     // Trim again after assistant turn.
     if (hist.length > MAX_HIST) hist.splice(0, hist.length - MAX_HIST);
 
-    // NOTE: the old addUsed() call (which incremented a purely local,
-    // browser-controlled counter) has been removed. Usage was already
-    // incremented server-side, atomically, before this response was
-    // returned — incrementing again here would be redundant at best and
-    // was never the real enforcement point anyway. showUsageBar() below
-    // re-fetches the actual, current count from the server so the display
-    // reflects reality rather than a locally-tracked number.
+    // Usage was reserved server-side before model generation. Refresh the
+    // display from the Worker so the UI reflects the enforced count.
     showUsageBar();
     addMsg(result);
 
