@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="AI-powered tax and retirement research tool for fee-only CFPs and NAPFA-listed financial advisors. IRS-cited sources. Research assistant only.">
 <title>WealthPilot — AI Research Assistant for Financial Advisors</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
-<script>(function(){ emailjs.init({ publicKey: "7NynABxMNuJoxAJNl" }); })();</script>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f5a623'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='20' fill='%23000'%3EW%3C/text%3E%3C/svg%3E">
 <style>
 /* ── Reset & variables ── */
@@ -423,7 +421,14 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
           <span>I agree to receive updates from WealthPilot and accept the <a onclick="showTerms()">Terms of Service</a></span>
         </label>
         <div class="gate-err" id="gate-err" role="alert"></div>
-        <button type="button" class="gate-submit" onclick="submitGate(event)">Get Free Access &rarr;</button>
+        <div id="pin-step" style="display:none;margin-top:12px">
+          <p style="font-size:12px;color:var(--muted);text-align:center;margin:0 0 8px">Enter the six-digit code sent to your email.</p>
+          <input type="text" id="g-pin" inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]{6}" placeholder="6-digit verification code" aria-label="Six-digit verification code">
+          <button type="button" class="gate-submit" onclick="verifyPin(event)">Verify Email &amp; Continue &rarr;</button>
+          <button type="button" class="gate-submit" style="background:transparent;color:var(--gold);border:1px solid var(--gold);margin-top:8px" onclick="requestPin(event)">Resend Code</button>
+          <p id="pin-status" style="font-size:11px;color:var(--muted);text-align:center;margin:8px 0 0"></p>
+        </div>
+        <button type="button" class="gate-submit" id="gate-submit" onclick="submitGate(event)">Email Me a Verification Code &rarr;</button>
       </form>
       <p class="gate-privacy">&#128274; No client data collected. No data sold. <a onclick="showPrivacy()">Privacy Policy</a> &middot; <a onclick="showTerms()">Terms</a></p>
     </div>
@@ -510,7 +515,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
         <li><span class="chk">&#10003;</span>Roth, RMD, IRMAA, SS coverage</li>
         <li><span class="chk">&#10003;</span>Email support</li>
       </ul>
-      <a class="pcta cs" href="https://wise.com/pay/r/1o6PoRc62rCf0t8" target="_blank" rel="noopener">Get Started</a>
+      <a class="pcta cs" href="#" onclick="openDodoCheckout('starter');return false">Get Started</a>
     </div>
     <div class="pc pro">
       <div class="pop-tag">MOST POPULAR</div>
@@ -526,7 +531,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
         <li><span class="chk">&#10003;</span>Priority email support</li>
         <li><span class="chk">&#10003;</span>14-day money-back guarantee</li>
       </ul>
-      <a class="pcta cp" href="https://wise.com/pay/r/rOIL702LDK-xt_s" target="_blank" rel="noopener">Get Started</a>
+      <a class="pcta cp" href="#" onclick="openDodoCheckout('professional');return false">Get Started</a>
     </div>
     <div class="pc">
       <div class="p-tier e">ENTERPRISE</div>
@@ -593,6 +598,10 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 // ─── Config ──────────────────────────────────────────────────────────────────
 
 const AI_CONFIG = { endpoint: 'https://empty-block-1f07.babar-wealthpilot.workers.dev' };
+const DODO_CHECKOUT_LINKS = Object.freeze({
+  starter: 'https://checkout.dodopayments.com/buy/REPLACE_WITH_STARTER_PRODUCT_ID',
+  professional: 'https://checkout.dodopayments.com/buy/REPLACE_WITH_PROFESSIONAL_PRODUCT_ID',
+});
 const ACCESS_DAYS  = 14;
 const MAX_QUERY    = 500;
 /** Maximum messages retained in conversation history sent to the API. */
@@ -720,42 +729,108 @@ function updateCharCount(el) {
   if (l > MAX_QUERY) el.value = el.value.substring(0, MAX_QUERY);
 }
 
+function openDodoCheckout(plan) {
+  const link = DODO_CHECKOUT_LINKS[plan];
+  if (!link || link.includes('REPLACE_WITH_')) {
+    showToast('Dodo checkout is not configured yet. Add the correct product link for this plan before going live.');
+    return false;
+  }
+  const email = getUser()?.email;
+  const separator = link.includes('?') ? '&' : '?';
+  window.open(`${link}${separator}email=${encodeURIComponent(email || '')}&disableEmail=true`, '_blank', 'noopener,noreferrer');
+  return false;
+}
+
 // ─── User / gate ──────────────────────────────────────────────────────────────
 
 function getUser() { return LS.get('wp_user'); }
-function isAccessValid() { const u = getUser(); return !!u && (Date.now() - u.ts) < ACCESS_DAYS * 86_400_000; }
+function isAccessValid() {
+  const u = getUser();
+  return !!u && !!getLicenseToken() && (Date.now() - u.ts) < ACCESS_DAYS * 86_400_000;
+}
 
-function submitGate(e) {
-  e.preventDefault();
-  const name    = sanitize(document.getElementById('g-name').value);
-  const email   = document.getElementById('g-email').value.trim().toLowerCase();
+let _pendingSignup = null;
+
+async function authPost(path, body) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 20_000);
+  try {
+    const response = await fetch(AI_CONFIG.endpoint + path, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data?.error?.message || 'Authentication request failed.');
+    return data;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+function showPinStep(message = '') {
+  document.getElementById('pin-step').style.display = 'block';
+  document.getElementById('gate-submit').style.display = 'none';
+  document.getElementById('pin-status').textContent = message;
+  document.getElementById('g-pin').focus();
+}
+
+async function requestPin(e) {
+  if (e?.preventDefault) e.preventDefault();
+  const err = document.getElementById('gate-err');
+  const email = document.getElementById('g-email').value.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    err.style.display = 'block'; err.textContent = 'Please enter a valid email address first.'; return;
+  }
+  try {
+    const data = await authPost('/auth/request-pin', { email });
+    if (!data.ok) throw new Error(data.message || 'PIN request failed.');
+    showPinStep('Code sent. It expires in 10 minutes.');
+    err.style.display = 'none';
+  } catch (error) {
+    err.style.display = 'block'; err.textContent = error.name === 'AbortError' ? 'PIN request timed out. Please try again.' : error.message;
+  }
+}
+
+async function submitGate(e) {
+  if (e?.preventDefault) e.preventDefault();
+  const name = sanitize(document.getElementById('g-name').value);
+  const email = document.getElementById('g-email').value.trim().toLowerCase();
   const consent = document.getElementById('g-consent').checked;
-  const err     = document.getElementById('gate-err');
+  const err = document.getElementById('gate-err');
   if (!name || !email || !consent) { err.style.display = 'block'; err.textContent = 'Please fill in all fields and check the consent box.'; return; }
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { err.style.display = 'block'; err.textContent = 'Please enter a valid email address.'; return; }
-  err.style.display = 'none';
-  const user = { name, email, consent, ts: Date.now() };
-  LS.set('wp_user', user);
-  // Local cache kept as a fallback / for this browser's own history; the
-  // admin dashboard now reads from the server (see renderAdminDash), not
-  // from this list, since localStorage only ever reflected the current
-  // visitor's own browser and never showed real cross-visitor signups.
-  const leads = LS.get('wp_leads') || [];
-  leads.push({ ...user, id: Date.now() });
-  LS.set('wp_leads', leads);
-  emailjs.send('service_eq5dkmg', 'template_sbv9fgi', {
-    to_email: 'babar.wealthpilot@gmail.com', from_name: name, from_email: email,
-    consent: consent ? 'Yes' : 'No', signup_time: new Date().toLocaleString(),
-    message: 'New WealthPilot signup: ' + name + ' (' + email + ')',
-  }).catch(() => {});
-  // Persist the lead server-side (Cloudflare KV) so the admin dashboard can
-  // show real signups from any visitor's browser, not just the admin's own.
-  fetch(AI_CONFIG.endpoint + '/lead', {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ name, email, consent }),
-  }).catch(() => {});
-  enterApp();
+  _pendingSignup = { name, email, consent };
+  sessionStorage.setItem('wp_pending_signup', JSON.stringify(_pendingSignup));
+  await requestPin(e);
+}
+
+async function verifyPin(e) {
+  if (e?.preventDefault) e.preventDefault();
+  const err = document.getElementById('gate-err');
+  const pin = document.getElementById('g-pin').value.trim();
+  const pending = _pendingSignup || (() => { try { return JSON.parse(sessionStorage.getItem('wp_pending_signup')); } catch { return null; } })();
+  if (!pending?.email || !/^\d{6}$/.test(pin)) { err.style.display = 'block'; err.textContent = 'Enter the six-digit code from your email.'; return; }
+  try {
+    const data = await authPost('/auth/verify-pin', { email: pending.email, pin });
+    if (!data.ok || !data.token) throw new Error('Verification failed. Please request a new code.');
+    sessionStorage.setItem('wp_license_token', data.token);
+    const user = { ...pending, ts: Date.now() };
+    LS.set('wp_user', user);
+    const leads = LS.get('wp_leads') || [];
+    if (!leads.some(item => item.email === user.email)) { leads.push({ ...user, id: Date.now() }); LS.set('wp_leads', leads); }
+    fetch(AI_CONFIG.endpoint + '/lead', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(user),
+    }).catch(() => {});
+    sessionStorage.removeItem('wp_pending_signup');
+    _pendingSignup = null;
+    enterApp();
+  } catch (error) {
+    err.style.display = 'block'; err.textContent = error.name === 'AbortError' ? 'Verification timed out. Please try again.' : error.message;
+  }
 }
 
 function enterApp() {
@@ -942,11 +1017,11 @@ function openUpgradeModal() {
     <div class="m-title">&#128640; Upgrade WealthPilot</div>
     <p class="m-sub">You've reached your ${PLAN_CONFIG[plan].label} limit. Upgrade to continue your research.</p>
     <div class="upgrade-plans">
-      <a class="up-row" href="https://wise.com/pay/r/1o6PoRc62rCf0t8" target="_blank" rel="noopener" onclick="cm()">
+      <a class="up-row" href="#" onclick="openDodoCheckout('starter');cm();return false">
         <div><div class="up-name">Starter</div><div style="font-size:12px;color:var(--muted)">30 queries/month</div></div>
         <div class="up-price">$199/mo &rarr;</div>
       </a>
-      <a class="up-row popular" href="https://wise.com/pay/r/rOIL702LDK-xt_s" target="_blank" rel="noopener" onclick="cm()">
+      <a class="up-row popular" href="#" onclick="openDodoCheckout('professional');cm();return false">
         <div><div class="up-name">Professional <span class="pop-badge">POPULAR</span></div><div style="font-size:12px;color:var(--muted)">100 queries/month + custom branding</div></div>
         <div class="up-price">$299/mo &rarr;</div>
       </a>
