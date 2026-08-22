@@ -397,6 +397,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
     <div class="ai-pill">&#9889; AI POWERED</div>
     <button class="n-btn on" id="nb-chat" onclick="goScreen('chat')">Ask Anything</button>
     <button class="n-btn" id="nb-pricing" onclick="goScreen('pricing')">Pricing</button>
+    <button class="n-btn" id="nb-logout" onclick="logoutUser()">Log out</button>
   </div>
 </nav>
 
@@ -533,19 +534,6 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
       </ul>
       <a class="pcta cp" href="#" onclick="openDodoCheckout('professional');return false">Get Started</a>
     </div>
-    <div class="pc">
-      <div class="p-tier e">ENTERPRISE</div>
-      <div class="p-price"><span class="p-num">$599</span><span class="p-per">/mo</span></div>
-      <p class="p-desc">For growing RIA practices needing white-label branding</p>
-      <ul class="pf">
-        <li><span class="chk">&#10003;</span>Unlimited queries</li>
-        <li><span class="chk">&#10003;</span>Everything in Professional</li>
-        <li><span class="chk">&#10003;</span>White-label branding</li>
-        <li><span class="chk">&#10003;</span>Custom system prompt for your firm</li>
-        <li><span class="chk">&#10003;</span>Manual onboarding by founder</li>
-      </ul>
-      <a class="pcta ce" href="mailto:babar.wealthpilot@gmail.com?subject=WealthPilot Enterprise">Contact Us</a>
-    </div>
   </div>
   <div class="founder-section">
     <div class="founder-card">
@@ -599,10 +587,13 @@ nav{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--bg-nav);bor
 
 const AI_CONFIG = { endpoint: 'https://empty-block-1f07.babar-wealthpilot.workers.dev' };
 const DODO_CHECKOUT_LINKS = Object.freeze({
+  // Replace only after creating the corresponding recurring products in Dodo.
+  // Static links are safe to use for the first customer; Checkout Sessions are
+  // the later upgrade path when the Worker receives DODO_PAYMENTS_API_KEY.
   starter: 'https://checkout.dodopayments.com/buy/REPLACE_WITH_STARTER_PRODUCT_ID',
   professional: 'https://checkout.dodopayments.com/buy/REPLACE_WITH_PROFESSIONAL_PRODUCT_ID',
 });
-const ACCESS_DAYS  = 14;
+const ACCESS_DAYS  = 14; // Founder-facing display/trial reference; server is authoritative.
 const MAX_QUERY    = 500;
 /** Maximum messages retained in conversation history sent to the API. */
 const MAX_HIST     = 10;
@@ -621,7 +612,6 @@ const PLAN_CONFIG = {
   free:         { limit: 5,    period: 'total', label: 'Free Trial' },
   starter:      { limit: 30,   period: 'month', label: 'Starter' },
   professional: { limit: 100,  period: 'month', label: 'Professional' },
-  enterprise:   { limit: 9999, period: 'month', label: 'Enterprise' },
 };
 
 // System prompt — role, expertise, and formatting rules only. Domain reference
@@ -729,24 +719,96 @@ function updateCharCount(el) {
   if (l > MAX_QUERY) el.value = el.value.substring(0, MAX_QUERY);
 }
 
-function openDodoCheckout(plan) {
-  const link = DODO_CHECKOUT_LINKS[plan];
-  if (!link || link.includes('REPLACE_WITH_')) {
-    showToast('Dodo checkout is not configured yet. Add the correct product link for this plan before going live.');
+async function openDodoCheckout(plan) {
+  const user = getUser();
+  const licenseToken = getLicenseToken();
+  if (!user?.email || !licenseToken) {
+    showToast('Please verify your email before opening checkout.');
     return false;
   }
-  const email = getUser()?.email;
+
+  // Preferred path: the Worker creates a fresh, customer-bound Checkout
+  // Session so product IDs and the Dodo API key never reach the browser.
+  try {
+    const res = await fetch(AI_CONFIG.endpoint + '/billing/checkout', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ plan, email: user.email, name: user.name || '', licenseToken }),
+    });
+    const data = await res.json().catch(() => null);
+    if (res.ok && data?.checkout_url) {
+      window.open(data.checkout_url, '_blank', 'noopener,noreferrer');
+      return false;
+    }
+  } catch { /* use static-link fallback below when configured */ }
+
+  // Lightweight pre-revenue fallback: a real Dodo static link can be used
+  // without putting a Dodo API key in the page. It remains fail-closed while
+  // the placeholder is present.
+  const link = DODO_CHECKOUT_LINKS[plan];
+  if (!link || link.includes('REPLACE_WITH_')) {
+    showToast('Dodo checkout is not configured yet. Add the Dodo product mapping or a real checkout link before going live.');
+    return false;
+  }
   const separator = link.includes('?') ? '&' : '?';
-  window.open(`${link}${separator}email=${encodeURIComponent(email || '')}&disableEmail=true`, '_blank', 'noopener,noreferrer');
+  window.open(`${link}${separator}email=${encodeURIComponent(user.email)}&disableEmail=true`, '_blank', 'noopener,noreferrer');
   return false;
 }
 
 // ─── User / gate ──────────────────────────────────────────────────────────────
 
 function getUser() { return LS.get('wp_user'); }
-function isAccessValid() {
+function hasSessionCredentials() {
   const u = getUser();
-  return !!u && !!getLicenseToken() && (Date.now() - u.ts) < ACCESS_DAYS * 86_400_000;
+  return !!u?.email && !!getLicenseToken();
+}
+
+function showGate(message = '') {
+  document.getElementById('screen-gate').classList.add('on');
+  document.getElementById('main-nav').style.display = 'none';
+  document.getElementById('wa-float').style.display = 'none';
+  if (message) {
+    const err = document.getElementById('gate-err');
+    err.textContent = message;
+    err.style.display = 'block';
+  }
+}
+
+async function logoutUser() {
+  const user = getUser();
+  const token = getLicenseToken();
+  try {
+    if (user?.email && token) await authPost('/auth/logout', { email: user.email, licenseToken: token });
+  } catch { /* local logout still proceeds if the network is unavailable */ }
+  try { sessionStorage.removeItem('wp_license_token'); sessionStorage.removeItem('wp_pending_signup'); } catch {}
+  LS.del('wp_user');
+  _pendingSignup = null;
+  hist = [];
+  _serverUsagePlan = 'free';
+  document.getElementById('screen-chat').classList.remove('on');
+  document.getElementById('screen-pricing').classList.remove('on');
+  document.getElementById('screen-admin').classList.remove('on');
+  document.getElementById('pin-step').style.display = 'none';
+  document.getElementById('gate-submit').style.display = 'block';
+  document.getElementById('g-pin').value = '';
+  document.getElementById('gate-err').style.display = 'none';
+  showGate();
+}
+
+async function restoreSession() {
+  if (!hasSessionCredentials()) { showGate(); return false; }
+  const user = getUser();
+  try {
+    const data = await authPost('/auth/session', { email: user.email, licenseToken: getLicenseToken() });
+    if (data?.ok) { enterApp(); return true; }
+  } catch (error) {
+    showGate(error.message || 'Your session has expired. Verify your email again to continue.');
+    try { sessionStorage.removeItem('wp_license_token'); } catch {}
+    LS.del('wp_user');
+    return false;
+  }
+  showGate('Your session has expired. Verify your email again to continue.');
+  return false;
 }
 
 let _pendingSignup = null;
@@ -823,7 +885,7 @@ async function verifyPin(e) {
     fetch(AI_CONFIG.endpoint + '/lead', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(user),
+      body: JSON.stringify({ ...user, licenseToken: data.token }),
     }).catch(() => {});
     sessionStorage.removeItem('wp_pending_signup');
     _pendingSignup = null;
@@ -868,7 +930,11 @@ async function fetchServerUsage() {
         licenseToken: getLicenseToken(),
       }),
     });
-    return await res.json();
+    const data = await res.json().catch(() => null);
+    if (!res.ok && ['AUTH_REQUIRED', 'SESSION_INVALID', 'TRIAL_EXPIRED'].includes(data?.error?.code)) {
+      await logoutUser();
+    }
+    return data;
   } catch (e) {
     return null;
   }
@@ -988,7 +1054,7 @@ function showTerms() {
       <h2>3. Subscription & payment</h2>
       <ul>
         <li>Free trial: 14 days, limited queries</li>
-        <li>Starter $199/mo · Professional $299/mo · Enterprise $599/mo</li>
+        <li>Starter $199/mo · Professional $299/mo</li>
         <li>Cancel anytime by emailing babar.wealthpilot@gmail.com</li>
         <li>14-day money-back guarantee on first paid month</li>
         <li>30 days notice before any price increase</li>
@@ -1022,12 +1088,8 @@ function openUpgradeModal() {
         <div class="up-price">$199/mo &rarr;</div>
       </a>
       <a class="up-row popular" href="#" onclick="openDodoCheckout('professional');cm();return false">
-        <div><div class="up-name">Professional <span class="pop-badge">POPULAR</span></div><div style="font-size:12px;color:var(--muted)">100 queries/month + custom branding</div></div>
+        <div><div class="up-name">Professional <span class="pop-badge">POPULAR</span></div><div style="font-size:12px;color:var(--muted)">100 queries/month + priority support</div></div>
         <div class="up-price">$299/mo &rarr;</div>
-      </a>
-      <a class="up-row" href="mailto:babar.wealthpilot@gmail.com?subject=WealthPilot Enterprise" onclick="cm()">
-        <div><div class="up-name">Enterprise</div><div style="font-size:12px;color:var(--muted)">Unlimited + white-label</div></div>
-        <div class="up-price">$599/mo &rarr;</div>
       </a>
     </div>
     <p style="font-size:11.5px;color:var(--dim);text-align:center">Complete checkout using the verified email on this account. After Dodo confirms payment, your plan is activated automatically through the secure webhook.</p>
@@ -1065,9 +1127,9 @@ async function adminLogin() {
       body: JSON.stringify({ password: pw }),
     });
     const data = await res.json();
-    if (data && data.ok) {
+      if (data && data.ok && data.token) {
       adminAuthed = true;
-      _adminPwCache = pw;
+      _adminPwCache = data.token;
       document.getElementById('admin-login').style.display = 'none';
       document.getElementById('admin-dash').style.display = 'block';
       renderAdminDash();
@@ -1084,6 +1146,7 @@ async function adminLogin() {
 }
 
 function adminLogout() {
+  if (_adminPwCache) fetch(AI_CONFIG.endpoint + '/admin-logout', { method: 'POST', headers: { Authorization: `Bearer ${_adminPwCache}` } }).catch(() => {});
   adminAuthed = false;
   _adminPwCache = null;
   document.getElementById('admin-login').style.display = 'flex';
@@ -1099,7 +1162,7 @@ async function renderAdminDash() {
   let leads = [];
   try {
     const res = await fetch(AI_CONFIG.endpoint + '/leads', {
-      headers: { 'x-admin-password': _adminPwCache || '' },
+          headers: { Authorization: `Bearer ${_adminPwCache || ''}` },
     });
     const data = await res.json();
     if (data && data.ok) {
@@ -1970,6 +2033,9 @@ async function send() {
     // to do before a send() was even attempted.
     if (/limit reached/i.test(errText)) {
       openUpgradeModal();
+    } else if (/AUTH_REQUIRED|SESSION_INVALID|TRIAL_EXPIRED/i.test(err?.message || '')) {
+      await logoutUser();
+      showToast('Your session has expired. Please verify your email again.');
     } else {
       showToast(errText);
     }
@@ -2037,10 +2103,9 @@ const ag = (el) => { el.style.height = 'auto'; el.style.height = Math.min(el.scr
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 
-(function init() {
+(async function init() {
   if (checkRoute()) return;
-  if (isAccessValid()) { enterApp(); return; }
-  document.getElementById('screen-gate').classList.add('on');
+  await restoreSession();
 })();
 </script>
 </body>
