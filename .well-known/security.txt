@@ -1,0 +1,4 @@
+Contact: mailto:babar.wealthpilot@gmail.com
+Preferred-Languages: en
+Expires: 2027-08-29T00:00:00.000Z
+Canonical: https://babarkhan01.github.io/wealthpilot/.well-known/security.txt
