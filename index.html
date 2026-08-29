@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="AI-powered tax and retirement research tool for fee-only CFPs and NAPFA-listed financial advisors. IRS-cited sources. Research assistant only.">
+<meta property="og:title" content="WealthPilot — AI Research Assistant for Financial Advisors">
+<meta property="og:description" content="Advisor-grade tax, retirement, Social Security, and Medicare research with cited sources and server-enforced usage. Research support only.">
+<meta property="og:url" content="https://babarkhan01.github.io/wealthpilot/">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://babarkhan01.github.io/wealthpilot/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="WealthPilot — AI Research Assistant for Financial Advisors">
+<meta name="twitter:description" content="Advisor-grade financial research support for professional advisors.">
+<meta name="twitter:image" content="https://babarkhan01.github.io/wealthpilot/og-image.png">
+<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
 <title>WealthPilot — AI Research Assistant for Financial Advisors</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23f5a623'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='central' text-anchor='middle' font-family='Arial Black,sans-serif' font-weight='900' font-size='20' fill='%23000'%3EW%3C/text%3E%3C/svg%3E">
 <style>
@@ -1011,24 +1021,27 @@ function checkRoute() {
 function showPrivacy() {
   document.getElementById('mb2').innerHTML = `
     <div class="m-title">&#128274; Privacy Policy</div>
-    <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Effective: June 15, 2026</p>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Effective: August 29, 2026</p>
     <div class="legal-content">
       <div class="legal-highlight"><p>&#128274; <strong>Short version:</strong> WealthPilot collects your name and email for access and support, plus a pseudonymous device identifier for server-side usage enforcement. We do not store client financial data in the conversation database. We never sell your information.</p></div>
       <h2>1. What we collect</h2>
-      <p>Name and email address (signup and access lookup), consent confirmation, a pseudonymous device identifier, server-side usage counters, and session conversation history (browser memory only, cleared on page close).</p>
-      <p><strong>We do not collect</strong> client names, SSNs, account numbers, or any third-party personal data.</p>
+      <p>Name and email address (signup and access lookup), consent confirmation, a pseudonymous device identifier, server-side usage counters, IP address used for rate limiting and abuse prevention, hashed six-digit PIN records, hashed session-token records, payment and subscription identifiers supplied by Dodo Payments, and session conversation history (browser memory only, cleared on page close).</p>
+      <p><strong>Do not enter client names, Social Security numbers, account numbers, or other unnecessary client-identifying information.</strong> WealthPilot does not intentionally collect those categories as client-report data.</p>
       <h2>2. How we use it</h2>
-      <ul><li>To grant and manage your access</li><li>To send product updates (if you consented)</li><li>To respond to support requests</li></ul>
-      <h2>3. AI Processing — Anthropic Claude</h2>
-      <p>Queries are sent to Anthropic's API for processing under their Privacy Policy. <strong>Do not include client names, SSNs, or account numbers in queries.</strong> Use anonymised scenarios only.</p>
-      <h2>4. Data storage</h2>
-      <p>Conversation history: browser memory only. Name/email: stored securely to grant access and populate the admin leads dashboard. Device-based usage identifiers and usage counters are processed server-side for quota enforcement. No client conversation database. Request deletion: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a></p>
-      <h2>5. Your rights (GDPR & CCPA)</h2>
+      <ul><li>To grant and manage your access</li><li>To verify passwordless sign-in and maintain a bounded session</li><li>To enforce plan quotas, rate limits, security, and abuse prevention</li><li>To process subscriptions and payment status</li><li>To send transactional PIN messages and product updates when you consent</li><li>To respond to support requests</li></ul>
+      <h2>3. Service providers and AI processing</h2>
+      <p>Queries are sent to Anthropic's API for processing under its privacy terms. <strong>Use anonymised scenarios only.</strong> Cloudflare Workers and KV provide hosting, routing, rate limiting, and operational storage. Dodo Payments processes checkout, payment, and subscription information. Brevo is the primary transactional-email provider for PIN delivery; Resend or Cloudflare Email Service may be used as configured for fallback or operational email. Each provider receives only the information needed for its function under its own privacy and security policies.</p>
+      <h2>4. Data storage and retention</h2>
+      <p>Conversation history remains in browser memory and is cleared when the page is closed; WealthPilot does not maintain a client-conversation database. PIN hashes expire after approximately 10 minutes. Verified session-token hashes expire after approximately 30 days or when invalidated by logout. IP rate-limit counters generally expire after about one minute. Free usage counters remain for the trial-lifetime period; paid-plan counters are maintained for the applicable monthly period. Lead, identity, subscription, and support records are retained as operationally necessary until deletion is requested, subject to legal, fraud-prevention, and accounting requirements.</p>
+      <p>Request access, correction, deletion, or clarification at <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a>.</p>
+      <h2>5. Browser storage</h2>
+      <p>We do not use cookies. We use browser local storage and session storage solely to keep you signed in, retain a pseudonymous device identifier for free-trial enforcement, and hold short-lived sign-in state. We do not use third-party advertising or tracking scripts.</p>
+      <h2>6. Your rights (GDPR & CCPA)</h2>
       <ul><li>Access, correction, deletion, portability of your data</li><li>Opt out of marketing at any time</li><li>We have not sold personal data to any third party</li></ul>
       <p>Contact: <a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a> — response within 30 days.</p>
-      <h2>6. Security</h2>
+      <h2>7. Security</h2>
       <p>HTTPS encryption on all data in transit. API keys and admin credentials stored in Cloudflare Worker environment variables only — never in client-side code. Input sanitisation and rate limiting applied.</p>
-      <h2>7. Changes</h2>
+      <h2>8. Changes</h2>
       <p>We will update the effective date when this policy changes. Continued use constitutes acceptance.</p>
     </div>
     <button class="m-close" onclick="cm()">Close</button>`;
@@ -1038,7 +1051,7 @@ function showPrivacy() {
 function showTerms() {
   document.getElementById('mb2').innerHTML = `
     <div class="m-title">&#128203; Terms of Service</div>
-    <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Effective: June 15, 2026</p>
+    <p style="font-size:12px;color:var(--dim);margin-bottom:1rem">Effective: August 29, 2026</p>
     <div class="legal-content">
       <div class="legal-warn"><p>&#9888;&#65039; <strong>Important:</strong> WealthPilot provides AI-assisted research for informational purposes only. Not registered investment, tax, or legal advice. You are solely responsible for verifying all outputs before client use.</p></div>
       <h2>1. Acceptance</h2>
@@ -1055,22 +1068,25 @@ function showTerms() {
       <ul>
         <li>Free trial: 14 days, limited queries</li>
         <li>Starter $199/mo · Professional $299/mo</li>
-        <li>Cancel anytime by emailing babar.wealthpilot@gmail.com</li>
+        <li>Payments are processed by Dodo Payments, acting as Merchant of Record where applicable. Payment information is handled by Dodo Payments under its privacy and security policies and is not stored by WealthPilot.</li>
+        <li>Cancel through the Dodo customer portal when available or by emailing babar.wealthpilot@gmail.com.</li>
         <li>14-day money-back guarantee on first paid month</li>
         <li>30 days notice before any price increase</li>
       </ul>
-      <h2>4. Acceptable use</h2>
+      <h2>4. Professional use only</h2>
+      <p>WealthPilot is intended solely for use by licensed financial advisory professionals in their professional capacity. It is not intended for individual consumers seeking personal financial, tax, or legal advice.</p>
+      <h2>5. Acceptable use</h2>
       <ul>
         <li>Do not enter client names, SSNs, or account numbers in queries</li>
         <li>Do not share account access outside your firm</li>
         <li>Do not attempt to reverse-engineer or scrape WealthPilot</li>
         <li>Do not misrepresent AI outputs as independently verified professional advice</li>
       </ul>
-      <h2>5. Disclaimers & liability</h2>
+      <h2>6. Disclaimers & liability</h2>
       <p>THE SERVICE IS PROVIDED "AS IS" WITHOUT WARRANTIES OF ANY KIND. TO THE MAXIMUM EXTENT PERMITTED BY LAW, WEALTHPILOT SHALL NOT BE LIABLE FOR ANY INDIRECT, INCIDENTAL, OR CONSEQUENTIAL DAMAGES. OUR TOTAL LIABILITY SHALL NOT EXCEED THE AMOUNT YOU PAID IN THE PRIOR 12 MONTHS.</p>
-      <h2>6. Governing law</h2>
+      <h2>7. Governing law</h2>
       <p>These Terms are governed by the laws of the State of Delaware, United States. Disputes shall be resolved by binding arbitration under AAA rules.</p>
-      <h2>7. Contact</h2>
+      <h2>8. Contact</h2>
       <p><a href="mailto:babar.wealthpilot@gmail.com">babar.wealthpilot@gmail.com</a> — response within 2 business days.</p>
     </div>
     <button class="m-close" onclick="cm()">Close</button>`;
