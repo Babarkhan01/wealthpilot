@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://babarkhan01.github.io/wealthpilot/sitemap.xml
